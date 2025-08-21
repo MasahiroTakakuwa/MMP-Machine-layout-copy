@@ -1,0 +1,15 @@
+@tailwind base;       // 🇻🇳 Nạp các style cơ bản từ Tailwind CSS
+                      // 🇯🇵 Tailwind CSSの基本スタイルを読み込みます
+@tailwind components; // 🇻🇳 Nạp các component style (nếu có khai báo)
+                      // 🇯🇵 Tailwindのコンポーネントスタイルを読み込みます
+@tailwind utilities;  // 🇻🇳 Nạp các tiện ích CSS (ví dụ: p-2, flex, w-full...)
+                      // 🇯🇵 Tailwindのユーティリティクラスを読み込みます
+
+#svg-container {
+  width: 100%;         // 🇻🇳 Chiều rộng tối đa, phù hợp với kích thước màn hình
+                       // 🇯🇵 画面サイズに合わせて幅を100%に設定
+  height: auto;        // 🇻🇳 Chiều cao tự điều chỉnh theo nội dung
+                       // 🇯🇵 内容に応じて高さを自動調整
+  overflow: auto;      // 🇻🇳 Cho phép cuộn khi nội dung vượt quá khung
+                       // 🇯🇵 コンテンツが枠を超えた場合にスクロール可能にする
+}

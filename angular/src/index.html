@@ -1,0 +1,41 @@
+<!-- ==============================================================================
+src/index.html
+📄 index.html - 🇻🇳 Tệp HTML gốc, được trình duyệt tải đầu tiên khi chạy ứng dụng Angular
+               🇯🇵 Angularアプリ実行時に最初に読み込まれるHTMLファイル
+
+✅ 🇻🇳 Vai trò chính:
+     1. Xác định cấu trúc cơ bản của trang web (doctype, html, head, body)
+     2. Khai báo <app-root> để Angular gắn ứng dụng tại đây
+     3. Thiết lập thẻ base, meta, favicon...
+
+✅ 🇯🇵 主な役割：
+     1. ページの基本構造を定義する（doctype、html、head、body）
+     2. Angularが<app-root>にアプリをマウントする
+     3. baseタグ、meta情報、faviconなどを設定する
+=============================================================================== -->
+
+<!doctype html>
+<!-- 🇻🇳 Đây là file HTML gốc, là điểm khởi đầu của ứng dụng Angular khi được chạy trên trình duyệt.
+     🇯🇵 これはAngularアプリケーションがブラウザで実行される際の、出発点となるHTMLファイルです。 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Machine IoT Monitoring</title>
+  <base href="/">
+  <!-- 🇻🇳 Thẻ base xác định đường dẫn gốc cho tất cả các liên kết tương đối trong ứng dụng.
+       🇯🇵 baseタグは、アプリ内の全ての相対パスの基準となるURLを指定します。 -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 🇻🇳 Thẻ meta này giúp ứng dụng hiển thị tốt trên các thiết bị di động (responsive).
+       🇯🇵 このmetaタグは、アプリをモバイル端末で見やすく表示するための設定です。 -->
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- 🇻🇳 Biểu tượng favicon hiển thị ở tab trình duyệt.
+       🇯🇵 faviconは、ブラウザタブに表示されるアイコンです。 -->
+</head>
+<body>
+  <app-root></app-root>
+  <!-- 🇻🇳 Đây là nơi Angular sẽ "gắn" toàn bộ ứng dụng bằng cách render component gốc.
+       🇯🇵 Angularはここにルートコンポーネントをレンダリングして、アプリ全体を表示します。 -->
+</body>
+</html>
