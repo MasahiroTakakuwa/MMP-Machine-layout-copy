@@ -1,0 +1,38 @@
+import { Routes } from '@angular/router';
+import { AppLayout } from './app/layout/component/app.layout';
+import { Dashboard } from './app/pages/dashboard/dashboard';
+import { Documentation } from './app/pages/documentation/documentation';
+import { Landing } from './app/pages/landing/landing';
+import { Notfound } from './app/pages/notfound/notfound';
+import { MercuryComponent } from './app/mercury/mercury.component';
+import { TierraComponent } from './app/tierra/tierra.component';
+import { Tierra2Component } from './app/tierra2/tierra2.component';
+import { JupiterComponent } from './app/jupiter/jupiter.component';
+import { SaturnComponent } from './app/saturn/saturn.component';
+
+export const appRoutes: Routes = [
+    {
+        path: '',
+        component: AppLayout,
+        children: [
+            { path: '', component: Dashboard },
+            { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
+            { path: 'documentation', component: Documentation },
+            { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') },
+            // 🇻🇳 Khi truy cập đường dẫn gốc (""), tự động chuyển hướng sang trang "mercury".
+            // 🇯🇵 空のパス（""）にアクセスすると、自動的に "mercury" ページへリダイレクトします。
+            { path: 'mercury', component: MercuryComponent },
+            { path: 'tierra', component: TierraComponent },
+            { path: 'tierra2', component: Tierra2Component },
+            { path: 'jupiter', component: JupiterComponent },
+            { path: 'saturn', component: SaturnComponent },
+            // 🇻🇳 Các route tương ứng với từng nhà máy (component).
+            // 🇯🇵 それぞれの工場ページに対応するルート定義です。
+        ]
+    },
+    { path: 'landing', component: Landing },
+    { path: 'notfound', component: Notfound },
+    { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
+
+    { path: '**', redirectTo: '/notfound' }
+];
