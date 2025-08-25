@@ -1,0 +1,112 @@
+[
+    {
+        "id": 1,
+        "name": "view_users",
+        "describe": "Xem tài khoản người dùng"
+    },
+    {
+        "id": 2,
+        "name": "edit_users",
+        "describe": "Chỉnh sửa tài khoản người dùng"
+    },
+    {
+        "id": 3,
+        "name": "view_roles",
+        "describe": "Xem chức vụ"
+    },
+    {
+        "id": 4,
+        "name": "edit_roles",
+        "describe": "Chỉnh sửa chức vụ"
+    },
+    {
+        "id": 5,
+        "name": "view_departments",
+        "describe": "Xem bộ phận"
+    },
+    {
+        "id": 6,
+        "name": "edit_departments",
+        "describe": "Chỉnh sửa bộ phận"
+    },
+    {
+        "id": 7,
+        "name": "view_permissions",
+        "describe": "Xem phân quyền"
+    },
+    {
+        "id": 8,
+        "name": "edit_permissions",
+        "describe": "Chỉnh sửa phân quyền"
+    },
+    {
+        "id": 9,
+        "name": "view_home",
+        "describe": "Xem nội dung home"
+    },
+    {
+        "id": 10,
+        "name": "edit_home",
+        "describe": "Chỉnh sửa nội dung home"
+    },
+    {
+        "id": 11,
+        "name": "view_about_us",
+        "describe": "Xem nội dung about us"
+    },
+    {
+        "id": 12,
+        "name": "edit_about_us",
+        "describe": "Chỉnh sửa nội dung about us"
+    },
+    {
+        "id": 13,
+        "name": "view_products",
+        "describe": "Xem nội dung products"
+    },
+    {
+        "id": 14,
+        "name": "edit_products",
+        "describe": "Chỉnh sửa nội dung products"
+    },
+    {
+        "id": 15,
+        "name": "view_quality_policy",
+        "describe": "Xem nội dung quality policy"
+    },
+    {
+        "id": 16,
+        "name": "view_society",
+        "describe": "Xem nội dung society"
+    },
+    {
+        "id": 17,
+        "name": "edit_society",
+        "describe": "Chỉnh sửa nội dung society"
+    },
+    {
+        "id": 18,
+        "name": "view_recruitment",
+        "describe": "Xem nội dung recruitment"
+    },
+    {
+        "id": 19,
+        "name": "edit_recruitment",
+        "describe": "Chỉnh sửa nội dung recruitment"
+    },
+    {
+        "id": 20,
+        "name": "view_contact_us",
+        "describe": "Xem nội dung contact us"
+    },
+    {
+        "id": 21,
+        "name": "edit_contact_us",
+        "describe": "Chỉnh sửa nội dung contact us"
+    },
+    {
+        "id": 22,
+        "name": "edit_quality_policy",
+        "describe": "Chỉnh sửa nội dung quality policy"
+    }
+]
