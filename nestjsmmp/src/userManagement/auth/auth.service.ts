@@ -11,7 +11,7 @@ export class AuthService {
 
     async userId(request : Request): Promise<number> {
         // console.log('8');
-        const cookie = request.cookies['jwtmvpwebsite'];
+        const cookie = request.cookies['jwtmmpmachinelayout'];
         // console.log(cookie);
 
         if(!cookie){

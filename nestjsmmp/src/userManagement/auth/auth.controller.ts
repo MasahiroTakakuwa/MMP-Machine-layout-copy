@@ -17,10 +17,9 @@ export class AuthController {
     // Register a user
     @Post('register')
     async register(
-            @Body() body: CreateUserDto,
-            @Req() request: Request
+            @Body() body: CreateUserDto
         ): Promise<User> {
-        return this.userService.createUser(body, request);
+        return this.userService.createUser(body);
     }
 
     //Login with user
@@ -29,10 +28,9 @@ export class AuthController {
         @Body('user_name') user_name: string,
         @Body('password') password: string,
         @Res({ passthrough: true }) response: Response,
-        @Req() request: Request
     ): Promise<User> {
         // Ensure loginUser returns a single User, not an array
-        return this.userService.loginUser(user_name, password, response, request);
+        return this.userService.loginUser(user_name, password, response);
     }
 
     //Get info user by token

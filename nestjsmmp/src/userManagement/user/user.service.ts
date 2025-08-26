@@ -44,7 +44,7 @@ export class UserService extends AbstractService {
     }
 
     //Tạo mới user
-    async createUser(dto: CreateUserDto, request: Request): Promise<User> {
+    async createUser(dto: CreateUserDto): Promise<User> {
         try {
 
             if(dto.password.length < 6){
@@ -85,17 +85,7 @@ export class UserService extends AbstractService {
                 position,
                 roles,
             });
-
             const resultRegister = await super.create(newUser);
-
-            // Log
-            const id_user = await this.authService.userId(request);
-            let actor = await this.userRepository.findOne({ where: { id: id_user } });
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: `Tạo mới user: ${dto.user_name} - ${dto.email}`,
-                users: actor ? actor.user_name : 'system',
-            });
             return resultRegister;
         } catch (err) {
             throw new InternalServerErrorException(err.message);
@@ -111,29 +101,14 @@ export class UserService extends AbstractService {
 
     //Lấy thông tin user theo ID
     async findOne(id: number): Promise<User> {
-        const user = await super.findOne({
-        where: { id },
-        relations: ['department', 'position', 'roles', 'roles.permissions'],
-        });
+        const user = await super.findOne({id}, ['department', 'position', 'roles', 'roles.permissions']);
         if (!user) throw new NotFoundException(`User ID ${id} không tồn tại`);
 
-        const permissionsSet = new Map<
-            number,
-            { id: number; name: string; description: string }
-        >();
-
-        user.roles.forEach((role) => {
-            role.permissions.forEach((permission) => {
-            permissionsSet.set(permission.id, {
-                id: permission.id,
-                name: permission.name,
-                description: permission.description,
-            });
-            });
-        });
-        //Lấy danh sách phân quyền từ roles không trùng lặp
-        
-        const permissions = Array.from(permissionsSet.values());
+        const permissions = [
+            ...new Set(
+                user.roles.flatMap(role => role.permissions.map(p => p.id))
+            )
+        ];
         const { password: _, ...userWithoutPass } = user;
 
         return {
@@ -244,7 +219,7 @@ export class UserService extends AbstractService {
         return user;
     }
 
-    async loginUser(user_name: string, password: string, response : Response, request: Request): Promise<User> {
+    async loginUser(user_name: string, password: string, response : Response): Promise<User> {
         let user = await super.findOne({user_name:user_name}, ['department', 'position', 'roles', 'roles.permissions']);
             
         if(!user){
@@ -259,23 +234,11 @@ export class UserService extends AbstractService {
             throw new UnauthorizedException('INCORRECT PASSWORD', { cause: new Error(), description: 'INCORRECT PASSWORD' });
         }
 
-        const permissionsSet = new Map<
-            number,
-            { id: number; name: string; description: string }
-        >();
-
-        user.roles.forEach((role) => {
-            role.permissions.forEach((permission) => {
-            permissionsSet.set(permission.id, {
-                id: permission.id,
-                name: permission.name,
-                description: permission.description,
-            });
-            });
-        });
-        //Lấy danh sách phân quyền từ roles không trùng lặp
-        
-        const permissions = Array.from(permissionsSet.values());
+        const permissions = [
+            ...new Set(
+                user.roles.flatMap(role => role.permissions.map(p => p.id))
+            )
+        ];
         const { password: _, ...userWithoutPass } = user;
 
         // 🟢 Tạo JWT access token
@@ -289,7 +252,7 @@ export class UserService extends AbstractService {
 
         // Lưu refresh token vào cookie
         response.cookie('jwtmmpmachinelayout', accessToken, { httpOnly: true });
-        response.cookie('refresh_mmpmachinelayout', refreshToken, { httpOnly: true });
+        // response.cookie('refresh_mmpmachinelayout', refreshToken, { httpOnly: true });
 
         return {
             ...userWithoutPass,

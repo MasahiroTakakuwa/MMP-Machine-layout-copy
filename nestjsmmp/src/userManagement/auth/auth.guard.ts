@@ -11,7 +11,7 @@ export class AuthGuard implements CanActivate {
   }
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
-    const jwt = request.cookies['jwtmvpwebsite'];
+    const jwt = request.cookies['jwtmmpmachinelayout'];
     if(!jwt){
       throw new UnauthorizedException('YOU ARE NOT LOGGED IN', { cause: new Error(), description: 'YOU ARE NOT LOGGED IN' });
     }

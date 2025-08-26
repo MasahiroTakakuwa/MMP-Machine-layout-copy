@@ -1,3 +1,4 @@
+import { Department } from './../entities/departments.entity';
 import { AuthGuard } from './../auth/auth.guard';
 import { HasPermission } from './../permission/has-permission.decorator';
 import { UpdateDepartmentDto } from './models/update-department.dto';
@@ -13,29 +14,23 @@ export class DepartmentController {
             private departmentService: DepartmentService
         ){}
 
-    //Get all departments
-    @Get()
-    async all() {
-        return this.departmentService.all();
-    }
-
     // Tạo mới một bộ phận
     @Post()
     @HasPermission(6)
     @UseGuards(AuthGuard)
-    async create(@Body() dto: CreateDepartmentDto, @Req() request: Request) {
+    async create(@Body() dto: CreateDepartmentDto, @Req() request: Request): Promise<Department> {
         return this.departmentService.createDepartment(dto, request);
     }
 
     // Lấy tất cả các bộ phận
     @Get()
-    findAll() {
+    findAll(): Promise<Department[]> {
         return this.departmentService.findAll();
     }
 
     //Lấy bộ phận theo id
     @Get(':id')
-    findOne(@Param('id') id: string) {
+    findOne(@Param('id') id: string): Promise<Department> {
         return this.departmentService.findOne(+id);
     }
 
@@ -47,7 +42,7 @@ export class DepartmentController {
         @Param('id') id: string,
         @Body() dto: UpdateDepartmentDto,
         @Req() request: Request,
-    ) {
+    ):Promise<Department> {
         return this.departmentService.updateDepartment(+id, dto, request);
     }
     

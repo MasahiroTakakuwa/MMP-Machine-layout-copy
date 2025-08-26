@@ -65,7 +65,8 @@ export class DepartmentService extends AbstractService{
             if (!department) {
                 throw new NotFoundException(`Không tìm thấy bộ phận ID: ${id}`);
             }
-            const updateDepartment = await super.update(id, dto);
+            Object.assign(department, dto);  // merge dữ liệu mới
+            await super.update(id, department);
 
             const id_user = await this.authService.userId(request)
             let user = await this.userService.findOne(id_user);
@@ -77,13 +78,13 @@ export class DepartmentService extends AbstractService{
                 action: `Sửa bộ phận: ${department.name} - ${department.description} sang ${dto.name} - ${dto.description} tại ID: ${id}`,
                 users: user.user_name,
             })
-            return updateDepartment;
+            return department;
         } catch (err) {
             throw new InternalServerErrorException(err, { cause: new Error(), description: err });
         }
     }
 
-    async deleteDepartment(id: number, request: Request): Promise<Department> {
+    async deleteDepartment(id: number, request: Request) {
         try {
             const department = await super.findOne({id});
             if (!department) {
@@ -99,8 +100,8 @@ export class DepartmentService extends AbstractService{
                 action: `Xóa bộ phận: ${department.name} - ${department.description} tại ID: ${id}` ,
                 users: user.user_name,
             })
-
-            return super.delete(id);
+            await super.delete(id);
+            return { message: 'Xóa bộ phận thành công' };
         } catch (err) {
             throw new InternalServerErrorException(err, { cause: new Error(), description: err });
         }

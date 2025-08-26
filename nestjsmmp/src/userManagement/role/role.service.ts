@@ -76,7 +76,7 @@ export class RoleService extends AbstractService {
 
     //Lấy danh sách tất cả vai trò và các quyền liên quan
     async findAll(): Promise<Role[]> {
-        return this.roleRepository.find({ relations: ['users', 'permissions'] });
+        return this.roleRepository.find({ relations: ['permissions'] });
     }
 
     //Lấy thông tin vai trò theo ID
