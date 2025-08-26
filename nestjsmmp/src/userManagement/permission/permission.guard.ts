@@ -26,17 +26,17 @@ export class PermissionGuard implements CanActivate {
 
     const id = await this.authService.userId(request);
 
-    const user: User = await this.userService.findOne({id}, ['role', 'department']);
+    const user: User = await this.userService.findOne(id);
 
-    let permissions = [];
-    if(user.roles === null || user.roles === undefined || user.department?.id === undefined || user.department?.id === null){
-      permissions = [];
-    }else{
-      permissions = await this.userService.queryPermission({roleId: user.roles}, {departmentId: user.department.id});
-    }
+     // 🔹 Lấy danh sách permission từ tất cả roles
+    const permissionIds = [
+        ...new Set(
+            user.roles.flatMap(role => role.permissions.map(p => p.id))
+        )
+    ];
 
-     
-    const checkPermission = permissions.some(p => (p.permissionId === access && user.status === 'active'));
+    // const checkPermission = permissionIds.some(p => (p === Number(access) && user.status === 'active'));
+    const checkPermission = user.status === 'active' && permissionIds.includes(Number(access));
 
     if(checkPermission === false){
       throw new ForbiddenException('INSUFFICIENT AUTHORITY', { cause: new Error(), description: 'INSUFFICIENT AUTHORITY' });

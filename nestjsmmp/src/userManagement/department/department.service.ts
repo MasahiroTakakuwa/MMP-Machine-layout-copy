@@ -26,7 +26,7 @@ export class DepartmentService extends AbstractService{
         try {
             
             const id_user = await this.authService.userId(request)
-            let user = await this.userService.findOne({id: id_user}, ['role', 'department']);
+            let user = await this.userService.findOne(id_user);
             if (!user) {
                 throw new NotFoundException(`Không tìm thấy người dùng.`);
             }
@@ -68,7 +68,7 @@ export class DepartmentService extends AbstractService{
             const updateDepartment = await super.update(id, dto);
 
             const id_user = await this.authService.userId(request)
-            let user = await this.userService.findOne({id: id_user}, ['role', 'department']);
+            let user = await this.userService.findOne(id_user);
             if (!user) {
                 throw new NotFoundException(`Không tìm thấy người dùng.`);
             }
@@ -90,7 +90,7 @@ export class DepartmentService extends AbstractService{
                 throw new NotFoundException(`Không tìm thấy bộ phận ID: ${id}`);
             }
             const id_user = await this.authService.userId(request)
-            let user = await this.userService.findOne({id: id_user}, ['role', 'department']);
+            let user = await this.userService.findOne(id_user);
             if (!user) {
                 throw new NotFoundException(`Không tìm thấy người dùng.`);
             }

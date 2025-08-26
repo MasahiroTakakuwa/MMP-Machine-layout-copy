@@ -26,7 +26,7 @@ export class PositionService extends AbstractService{
     async createPosition(dto: CreatePositionDto, request: Request): Promise<Position> {
         try {
         const id_user = await this.authService.userId(request);
-        let user = await this.userService.findOne({ id: id_user }, ['role', 'department']);
+        let user = await this.userService.findOne(id_user );
         if (!user) {
             throw new NotFoundException(`Không tìm thấy người dùng.`);
         }
@@ -70,7 +70,7 @@ export class PositionService extends AbstractService{
         }
 
         const id_user = await this.authService.userId(request);
-        let user = await this.userService.findOne({ id: id_user }, ['role', 'department']);
+        let user = await this.userService.findOne(id_user );
         if (!user) {
             throw new NotFoundException(`Không tìm thấy người dùng.`);
         }
@@ -95,7 +95,7 @@ export class PositionService extends AbstractService{
             throw new NotFoundException(`Chức vụ với ID ${id} không tồn tại`);
         }
         const id_user = await this.authService.userId(request);
-        let user = await this.userService.findOne({ id: id_user }, ['role', 'department']);
+        let user = await this.userService.findOne(id_user );
         if (!user) {
             throw new NotFoundException(`Không tìm thấy người dùng.`);
         }

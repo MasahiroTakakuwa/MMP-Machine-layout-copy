@@ -46,7 +46,7 @@ export class RoleService extends AbstractService {
     async createRole(dto: CreateRoleDto, request: Request): Promise<Role> {
         try {
             const id_user = await this.authService.userId(request);
-            let user = await this.userService.findOne({ id: id_user }, ['role', 'department']);
+            let user = await this.userService.findOne(id_user );
             if (!user) {
                 throw new InternalServerErrorException(`Không tìm thấy người dùng.`);
             }
@@ -96,7 +96,7 @@ export class RoleService extends AbstractService {
         try {
 
             const id_user = await this.authService.userId(request);
-            let user = await this.userService.findOne({ id: id_user }, ['role', 'department']);
+            let user = await this.userService.findOne(id_user );
             if (!user) {
                 throw new NotFoundException(`Không tìm thấy người dùng.`);
             }
@@ -132,7 +132,7 @@ export class RoleService extends AbstractService {
     async deleteRole(id: number, request: Request): Promise<Role> {
         try {
             const id_user = await this.authService.userId(request);
-            let user = await this.userService.findOne({ id: id_user }, ['role', 'department']);
+            let user = await this.userService.findOne( id_user);
             if (!user) {
                 throw new NotFoundException(`Không tìm thấy người dùng.`);
             }

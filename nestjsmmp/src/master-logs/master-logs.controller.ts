@@ -25,7 +25,7 @@ export class LogsController {
     async getLogsUser(@Req() request: Request) {
 
         const id = await this.authService.userId(request)
-        let user = await this.userService.findOne({id}, ['role', 'department']);
+        let user = await this.userService.findOne(id);
         return this.logsService.find_user_logs(user.user_name);
     }
 
