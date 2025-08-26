@@ -29,4 +29,7 @@ export class UserToken {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({ default: false })
+  revoked: boolean;
 }

@@ -25,7 +25,7 @@ export class RoleController {
 
     //Lấy tất cả các vai trò và quyền
     @Get()
-    async findAll() {
+    async findAll():Promise<Role[]> {
         return this.roleService.findAll();
     }
         

@@ -14,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth/auth.service';
+import { UserToken } from '../entities/user-tokens.entity';
 @Injectable()
 export class UserService extends AbstractService {
     constructor(
@@ -21,6 +22,7 @@ export class UserService extends AbstractService {
         @InjectRepository(Department) private readonly departmentRepository: Repository<Department>,
         @InjectRepository(Position) private readonly positionRepository: Repository<Position>,
         @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+        @InjectRepository(UserToken) private readonly userTokenRepository: Repository<UserToken>,
         private jwtService: JwtService,
         private authService: AuthService,
         private logsService: LogsService,
@@ -219,7 +221,29 @@ export class UserService extends AbstractService {
         return user;
     }
 
-    async loginUser(user_name: string, password: string, response : Response): Promise<User> {
+    private async hashToken(token: string) {
+        // bcrypt or SHA-256; bcrypt adds salt — good for DB storage
+        const salt = await bcrypt.genSalt(10);
+        return bcrypt.hash(token, salt);
+    }
+
+    private async compareTokenHash(token: string, hash: string) {
+        return bcrypt.compare(token, hash);
+    }
+
+    async generateTokens(user: User) {
+        const accessToken = await this.jwtService.signAsync(
+        { sub: user.id },
+        { expiresIn: '30m' }
+        );
+        const refreshToken = await this.jwtService.signAsync(
+        { sub: user.id },
+        { expiresIn: '7d' }
+        );
+        return { accessToken, refreshToken };
+    }
+
+    async loginUser(user_name: string, password: string, response : Response, request: Request): Promise<User> {
         let user = await super.findOne({user_name:user_name}, ['department', 'position', 'roles', 'roles.permissions']);
             
         if(!user){
@@ -241,18 +265,36 @@ export class UserService extends AbstractService {
         ];
         const { password: _, ...userWithoutPass } = user;
 
-        // 🟢 Tạo JWT access token
-        const accessToken = await this.jwtService.signAsync({ id: user.id });
+        // 🟢 Tạo JWT access token và refresh token
+        const { accessToken, refreshToken } = await this.generateTokens(user);
 
-        // 🟢 (tuỳ chọn) Tạo refresh token
-        const refreshToken = await this.jwtService.signAsync(
-            { id: user.id },
-            { expiresIn: '7d' },
-        );
+        // hash refresh
+        const tokenRefreshHash = await this.hashToken(refreshToken);
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7d
+
+        // Lưu refresh token đã hash vào DB
+        await this.userTokenRepository.save(this.userTokenRepository.create({
+            user: user,
+            refresh_token: tokenRefreshHash,
+            expired_at: expiresAt,
+            ip_address: request.ip,
+            user_agent: request.headers['user-agent'] || 'unknown',
+        }));
 
         // Lưu refresh token vào cookie
-        response.cookie('jwtmmpmachinelayout', accessToken, { httpOnly: true });
-        // response.cookie('refresh_mmpmachinelayout', refreshToken, { httpOnly: true });
+        // set cookies (HttpOnly)
+        response.cookie('jwtmmpmachinelayout', accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            maxAge: 30 * 60 * 1000,
+        })
+        response.cookie('refresh_mmpmachinelayout', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
         return {
             ...userWithoutPass,
@@ -262,33 +304,92 @@ export class UserService extends AbstractService {
         };
     }
 
-    //Logout user
-    async logoutUser(response: Response): Promise<{ message: string }> {
-    try {
-        // const id_user = await this.authService.userId(request);
-        // let user = await super.findOne({ id: id_user }, ['department', 'position', 'roles']);
+    // Refresh endpoint: xác thực refresh token, rotate
+    async refreshTokens(refreshToken: string, response: Response, request: Request) {
+        try {
+            const payload = this.jwtService.verify(refreshToken); // throws if invalid/expired
+            const userId = Number(payload.sub);
 
-        // if (!user) {
-        //     throw new UnauthorizedException('USER NOT FOUND');
-        // }
+            const user = await this.findOne(userId);
+            if (!user) throw new UnauthorizedException('Invalid refresh token');
 
-        // Xoá cookie JWT
-        response.clearCookie('jwtmvpwebsite');
+            // find stored token record (we need to compare hash)
+            const tokens = await this.userTokenRepository.find({
+                where: { user: { id: userId }, revoked: false },
+            });
 
-        // (Optional) Nếu bạn lưu refresh token trong DB thì xoá nó
-        // await this.userTokenRepository.delete({ user: { id: id_user } });
+            // find matching hash
+            const matched = tokens.find(t => this.compareTokenHash(refreshToken, t.refresh_token));
+            if (!matched) {
+                // reuse detection or token not found => revoke all sessions for safety
+                await this.userTokenRepository.update({ user: { id: userId } }, { revoked: true });
+                throw new ForbiddenException('Refresh token reuse detected or invalid');
+            }
 
-        // Ghi log
-        // await this.logsService.create({
-        //     ip_address: request.ip,
-        //     action: `Đăng xuất tài khoản: ${user.user_name}`,
-        //     users: user.user_name,
-        // });
+            // rotate: revoke current token, create new refresh token
+            matched.revoked = true;
+            await this.userTokenRepository.save(matched);
 
-        return { message: 'Logout successful' };
-    } catch (err) {
-        throw new InternalServerErrorException(err, { cause: new Error(), description: err });
+            const { accessToken, refreshToken: newRefresh } = await this.generateTokens(user);
+            const newHash = await this.hashToken(newRefresh);
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+            await this.userTokenRepository.save(this.userTokenRepository.create({
+                user: user,
+                refresh_token: newHash,
+                expired_at: expiresAt,
+                ip_address: request.ip,
+                user_agent: request.headers['user-agent'] || 'unknown',
+            }));
+
+            // set cookies
+            response.cookie('jwtmmpmachinelayout', accessToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
+                maxAge: 30 * 60 * 1000,
+            })
+            response.cookie('refresh_mmpmachinelayout', newRefresh, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+            return { accessToken, refreshToken: newRefresh };
+        } catch (err) {
+        // nếu token expired/invalid
+            throw err;
+        }
     }
-}
+
+    //Logout user
+    async logoutUser(response: Response, request: Request): Promise<{ message: string }> {
+        try {
+            const refreshToken = request.cookies['refresh_mmpmachinelayout'];
+            const id_user = await this.authService.userId(request);
+
+            if (refreshToken) {
+                const tokens = await this.userTokenRepository.find({
+                    where: { user: { id: id_user }, revoked: false },
+                });
+
+                for (const t of tokens) {
+                    if (await bcrypt.compare(refreshToken, t.refresh_token)) {
+                        await this.userTokenRepository.update(t.id, { revoked: true });
+                        break;
+                    }
+                }
+            }
+
+            // Clear cookies
+            response.clearCookie('jwtmmpmachinelayout');
+            response.clearCookie('refresh_mmpmachinelayout');
+
+            return { message: 'Đăng xuất thành công' };
+        } catch (err) {
+            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
+        }
+    }
+
 
 }

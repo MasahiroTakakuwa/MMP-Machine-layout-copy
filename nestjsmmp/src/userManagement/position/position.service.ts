@@ -44,18 +44,17 @@ export class PositionService extends AbstractService{
 
     //Lấy danh sách tất cả chức vụ
     async findAll(): Promise<Position[]> {
-        return this.positionRepository.find({ relations: ['users'] });
+        return this.positionRepository.find();
     }
 
     //Lấy thông tin chức vụ theo ID
     async findOne(id: number): Promise<Position> {
         const position = await this.positionRepository.findOne({
-        where: { id },
-        relations: ['users'],
+            where: { id }
         });
 
         if (!position) {
-        throw new NotFoundException(`Chức vụ với ID ${id} không tồn tại`);
+            throw new NotFoundException(`Chức vụ với ID ${id} không tồn tại`);
         }
 
         return position;
@@ -74,21 +73,21 @@ export class PositionService extends AbstractService{
         if (!user) {
             throw new NotFoundException(`Không tìm thấy người dùng.`);
         }
-
-        const updatedPosition = await super.update(id, dto);
+        Object.assign(position, dto);  // merge dữ liệu mới
+        await super.update(id, position);
         await this.logsService.create({
             ip_address: request.ip,
             action: `Sửa chức vụ: ${position.name} - ${position.description} → ${dto.name} - ${dto.description} tại ID: ${id}`,
             users: user.user_name,
         });
 
-        return updatedPosition;
+        return position;
         } catch (err) {
         throw new InternalServerErrorException(err, { cause: new Error(), description: err });
         }
     }
 
-    async deletePosition(id: number, request: Request): Promise<Position> {
+    async deletePosition(id: number, request: Request) {
         try {
         const position = await super.findOne({ id });
         if (!position) {
@@ -104,10 +103,10 @@ export class PositionService extends AbstractService{
             action: `Xóa chức vụ: ${position.name} - ${position.description} tại ID: ${id}`,
             users: user.user_name,
         });
-
-        return super.delete(id);
+        await super.delete(id);
+        return { message: 'Xóa chức vụ thành công' };
         } catch (err) {
-        throw new InternalServerErrorException(err, { cause: new Error(), description: err });
+            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
         }
     }
 }
