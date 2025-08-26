@@ -18,7 +18,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Machine } from '../models/machine.model';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 
 // 🇻🇳 Đánh dấu service này có thể được inject toàn cục trong toàn ứng dụng.
 // 🇯🇵 このサービスはアプリ全体で依存性注入（DI）可能であることを示します。
@@ -35,6 +35,7 @@ export class MachineService {
   // ✅ 🇻🇳 Hàm lấy danh sách máy, truyền vào mã nhà máy (factory ID) động
   //    🇯🇵 工場ID（factory）を引数にして機械一覧を取得する関数です。
   getMachines(factory: number = 0): Observable<Machine[]> {
+    return of ([])
     const url = `${this.baseUrl}?factory=${factory}`;
     return this.http.get<any>(url).pipe(
       map((res) => res as Machine[])

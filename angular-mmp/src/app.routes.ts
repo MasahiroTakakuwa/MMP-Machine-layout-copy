@@ -9,9 +9,12 @@ import { TierraComponent } from './app/tierra/tierra.component';
 import { Tierra2Component } from './app/tierra2/tierra2.component';
 import { JupiterComponent } from './app/jupiter/jupiter.component';
 import { SaturnComponent } from './app/saturn/saturn.component';
+import { AuthGuard } from './app/guards/auth.guard';
+import { NonAuthGuard } from './app/guards/non-auth.guard';
 
 export const appRoutes: Routes = [
     {
+        // canActivate: [AuthGuard],
         path: '',
         component: AppLayout,
         children: [
@@ -32,7 +35,10 @@ export const appRoutes: Routes = [
     },
     { path: 'landing', component: Landing },
     { path: 'notfound', component: Notfound },
-    { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
+    { 
+        canActivate: [NonAuthGuard],
+        path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') 
+    },
 
     { path: '**', redirectTo: '/notfound' }
 ];
