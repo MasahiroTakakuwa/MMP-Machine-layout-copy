@@ -3,7 +3,7 @@ import { AuthService } from './../auth/auth.service';
 import { AuthGuard } from './../auth/auth.guard';
 import { UserCreateDto } from './models/user-create.dto';
 import { UserUpdateDto } from './models/user-update.dto';
-import { User } from './models/users.entity';
+import { User } from '../entities/users.entity';
 import { UserService } from './user.service';
 import { Controller, Get, Post, Body, UseInterceptors, ClassSerializerInterceptor, UseGuards, Param, Put, Delete, Req } from '@nestjs/common';
 import { Request } from 'express';

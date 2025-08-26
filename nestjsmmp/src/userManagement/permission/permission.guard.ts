@@ -1,4 +1,5 @@
-import { User } from './../user/models/users.entity';
+import { User } from './../entities/users.entity';
+
 import { UserService } from './../user/user.service';
 import { AuthService } from './../auth/auth.service';
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
@@ -28,10 +29,10 @@ export class PermissionGuard implements CanActivate {
     const user: User = await this.userService.findOne({id}, ['role', 'department']);
 
     let permissions = [];
-    if(user.role?.id === null || user.role?.id === undefined || user.department?.id === undefined || user.department?.id === null){
+    if(user.roles === null || user.roles === undefined || user.department?.id === undefined || user.department?.id === null){
       permissions = [];
     }else{
-      permissions = await this.userService.queryPermission({roleId: user.role.id}, {departmentId: user.department.id});
+      permissions = await this.userService.queryPermission({roleId: user.roles}, {departmentId: user.department.id});
     }
 
      

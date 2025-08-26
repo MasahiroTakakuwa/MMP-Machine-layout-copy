@@ -1,6 +1,8 @@
+import { UpdateRoleDto } from './models/update-role.dto';
+import { CreateRoleDto } from './models/create-role.dto';
+import { Role } from './../entities/role.entity';
 import { AuthGuard } from './../auth/auth.guard';
 import { HasPermission } from './../permission/has-permission.decorator';
-import { Role } from './models/role.entity';
 import { RoleService } from './role.service';
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
@@ -12,29 +14,25 @@ export class RoleController {
         ){
 
     }
-    //get all roles
-    @Get()
-    async all() {
-        return this.roleService.all();
-    }
-    
-    // Create a new role
+
+    // Tạo mới một vai trò và danh sách quyền
     @Post()
     @HasPermission(4)
     @UseGuards(AuthGuard)
-    async create(
-        @Body('name') name : string,
-        @Req() request: Request
-    ): Promise<Role>{
-        return await this.roleService.createRole(name, request);
+    async create(@Body() dto: CreateRoleDto, @Req() request: Request) {
+        return this.roleService.createRole(dto, request);
+    }
+
+    //Lấy tất cả các vai trò và quyền
+    @Get()
+    async findAll() {
+        return this.roleService.findAll();
     }
         
-    // Get a role by id
+    // Lấy vai trò theo id
     @Get(':id')
-    @HasPermission(3)
-    @UseGuards(AuthGuard)
-    async get(@Param('id') id: number) {
-        return this.roleService.findOne({id})
+    async findOne(@Param('id') id: string) {
+        return this.roleService.findOne(+id);
     }
 
     // Update a role by id
@@ -42,21 +40,18 @@ export class RoleController {
     @HasPermission(4)
     @UseGuards(AuthGuard)
     async update(
-        @Param('id') id: number,
-        @Body('name') name : string,
-        @Req() request: Request
-    ): Promise<Role> {
-        return await this.roleService.updateRole(id, name, request);
+        @Param('id') id: string,
+        @Body() dto: UpdateRoleDto,
+        @Req() request: Request,
+    ) {
+        return this.roleService.updateRole(+id, dto, request);
     }
     
     // Delete a role by id
     @Delete(':id')
     @HasPermission(4)
     @UseGuards(AuthGuard)
-    async delete(
-        @Param('id') id: number,
-        @Req() request: Request
-    ): Promise<Role>{
-        return await this.roleService.deleteRole(id, request);
+    async remove(@Param('id') id: string, @Req() request: Request) {
+        return this.roleService.deleteRole(+id, request);
     }
 }

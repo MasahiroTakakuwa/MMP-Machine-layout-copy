@@ -2,7 +2,7 @@ import { CommonModule } from './../common/common.module';
 import { Module } from '@nestjs/common';
 import { PermissionController } from './permission.controller';
 import { PermissionService } from './permission.service';
-import { Permission } from './models/permission.entity';
+import { Permission } from '../entities/permission.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({

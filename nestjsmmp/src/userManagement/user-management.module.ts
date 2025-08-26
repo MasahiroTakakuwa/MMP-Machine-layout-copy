@@ -1,3 +1,5 @@
+import { PositionModule } from './position/position.module';
+import { UserTokenModule } from './token/token.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { Module } from '@nestjs/common';
@@ -5,7 +7,6 @@ import { CommonModule } from './common/common.module';
 import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
 import { DepartmentModule } from './department/department.module';
-import { DecentralizationModule } from './decentralization/decentralization.module';
 import { UserModule } from './user/user.module';
 import { PermissionGuard } from './permission/permission.guard';
 
@@ -16,8 +17,9 @@ import { PermissionGuard } from './permission/permission.guard';
         RoleModule,
         PermissionModule,
         DepartmentModule,
-        DecentralizationModule,
         UserModule,
+        UserTokenModule,
+        PositionModule
     ],
     providers: [
         {

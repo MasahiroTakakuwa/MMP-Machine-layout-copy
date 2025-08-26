@@ -1,9 +1,11 @@
 import { AuthGuard } from './../auth/auth.guard';
-import { DepartmentService } from './department.service';
 import { HasPermission } from './../permission/has-permission.decorator';
+import { UpdateDepartmentDto } from './models/update-department.dto';
+import { CreateDepartmentDto } from './models/create-department.dto';
+import { DepartmentService } from './department.service';
 import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
 import { Request } from 'express';
-import { Department } from './models/departments.entity';
+
 
 @Controller('departments')
 export class DepartmentController {
@@ -17,46 +19,44 @@ export class DepartmentController {
         return this.departmentService.all();
     }
 
-    // Create a new department
+    // Tạo mới một bộ phận
     @Post()
     @HasPermission(6)
     @UseGuards(AuthGuard)
-    async create(
-        @Body('name') name : string,
-        @Req() request: Request
-    ): Promise<Department>{
-        return await this.departmentService.createDepartment(name, request);
-    }
-        
-    // Get a department by id
-    @Get(':id')
-    @HasPermission(5)
-    @UseGuards(AuthGuard)
-    async get(@Param('id') id: number) {
-        return this.departmentService.findOne({id})
+    async create(@Body() dto: CreateDepartmentDto, @Req() request: Request) {
+        return this.departmentService.createDepartment(dto, request);
     }
 
-    //update a department by id
+    // Lấy tất cả các bộ phận
+    @Get()
+    findAll() {
+        return this.departmentService.findAll();
+    }
+
+    //Lấy bộ phận theo id
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.departmentService.findOne(+id);
+    }
+
+    //cập nhật bộ phận theo id
     @Put(':id')
     @HasPermission(6)
     @UseGuards(AuthGuard)
-    async update(
-        @Param('id') id: number,
-        @Body('name') name : string,
-        @Req() request: Request
-    ): Promise<Department>{
-        return await this.departmentService.updateDepartment(id, name, request);
+    update(
+        @Param('id') id: string,
+        @Body() dto: UpdateDepartmentDto,
+        @Req() request: Request,
+    ) {
+        return this.departmentService.updateDepartment(+id, dto, request);
     }
     
-    //Delete a department by id
+    //Xoá bộ phận theo id
     @Delete(':id')
     @HasPermission(6)
     @UseGuards(AuthGuard)
-    async delete(
-        @Param('id') id: number,
-        @Req() request: Request
-        ):Promise<Department> {
-        return this.departmentService.deleteDepartment(id, request);
+    remove(@Param('id') id: string, @Req() request: Request) {
+        return this.departmentService.deleteDepartment(+id, request);
     }
 
 }

@@ -1,4 +1,4 @@
-import { User } from '../../userManagement/user/models/users.entity';
+import { User } from '../../userManagement/entities/users.entity';
 
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 

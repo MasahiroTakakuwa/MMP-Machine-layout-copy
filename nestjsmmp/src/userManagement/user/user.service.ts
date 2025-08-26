@@ -1,10 +1,15 @@
+import { UpdateUserDto } from './models/update-user.dto';
+import { Role } from './../entities/role.entity';
+import { Position } from './../entities/position.entity';
+import { Department } from './../entities/departments.entity';
+import { CreateUserDto } from './models/create-user.dto';
 import { LogsService } from './../../master-logs/master-logs.service';
 import { PaginatedResult } from './../common/paginated-result.interface';
 import { AbstractService } from '../common/abstract.service';
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, UnauthorizedException, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './models/users.entity';
-import { Raw, Repository } from 'typeorm';
+import { User } from '../entities/users.entity';
+import { In, Raw, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -13,6 +18,9 @@ import { AuthService } from '../auth/auth.service';
 export class UserService extends AbstractService {
     constructor(
         @InjectRepository(User) private readonly userRepository: Repository<User>,
+        @InjectRepository(Department) private readonly departmentRepository: Repository<Department>,
+        @InjectRepository(Position) private readonly positionRepository: Repository<Position>,
+        @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
         private jwtService: JwtService,
         private authService: AuthService,
         private logsService: LogsService,
@@ -35,51 +43,209 @@ export class UserService extends AbstractService {
         }
     }
 
-    async find_fe(): Promise<any> {
-        try{
-            const usersfelist = await this.repository
-                .createQueryBuilder('users')
-                .innerJoinAndSelect ('users.department', 'department')
-                .innerJoinAndSelect ('users.role', 'role')
-                .where('department.name = :name', {name: 'Bảo Trì'})
-                .getRawMany();
-            return usersfelist
+    //Tạo mới user
+    async createUser(dto: CreateUserDto, request: Request): Promise<User> {
+        try {
+
+            if(dto.password.length < 6){
+                throw new UnprocessableEntityException('PASSWORD HAS A MINIMUM 6 CHARACTERS', { cause: new Error(), description: 'PASSWORD HAS A MINIMUM 6 CHARACTERS' });
+            }
+
+            //Kiểm tra password có trùng nhau không
+            if(dto.password !== dto.password_confirm){
+                throw new UnprocessableEntityException('PASSWORD DOES NOT MATCH', { cause: new Error(), description: 'PASSWORD DOES NOT MATCH' });
+            }
+
+            dto.password = await bcrypt.hash(dto.password, 12);
+            dto.password_confirm = dto.password;
+            dto.status = 'inactive';
+
+            const department = dto.departmentId
+                ? await this.departmentRepository.findOne({ where: { id: dto.departmentId } })
+                : null;
+
+            const position = dto.positionId
+                ? await this.positionRepository.findOne({ where: { id: dto.positionId } })
+                : null;
+
+            const roles = dto.roleIds?.length
+                ? await this.roleRepository.find({ where: { id: In(dto.roleIds) } })
+                : [];
+
+            const newUser = this.userRepository.create({
+                user_name: dto.user_name,
+                first_name: dto.first_name,
+                last_name: dto.last_name,
+                email: dto.email,
+                password: dto.password,
+                phone_number: dto.phone_number,
+                avatar: dto.avatar,
+                status: dto.status,
+                department,
+                position,
+                roles,
+            });
+
+            const resultRegister = await super.create(newUser);
+
+            // Log
+            const id_user = await this.authService.userId(request);
+            let actor = await this.userRepository.findOne({ where: { id: id_user } });
+            await this.logsService.create({
+                ip_address: request.ip,
+                action: `Tạo mới user: ${dto.user_name} - ${dto.email}`,
+                users: actor ? actor.user_name : 'system',
+            });
+            return resultRegister;
+        } catch (err) {
+            throw new InternalServerErrorException(err.message);
         }
-        catch(err){
+    }
+
+    //Lấy danh sách tất cả user
+    async findAll(): Promise<User[]> {
+        return super.find({
+        relations: ['department', 'position', 'roles', 'roles.permissions'],
+        });
+    }
+
+    //Lấy thông tin user theo ID
+    async findOne(id: number): Promise<User> {
+        const user = await super.findOne({
+        where: { id },
+        relations: ['department', 'position', 'roles', 'roles.permissions'],
+        });
+        if (!user) throw new NotFoundException(`User ID ${id} không tồn tại`);
+
+        const permissionsSet = new Map<
+            number,
+            { id: number; name: string; description: string }
+        >();
+
+        user.roles.forEach((role) => {
+            role.permissions.forEach((permission) => {
+            permissionsSet.set(permission.id, {
+                id: permission.id,
+                name: permission.name,
+                description: permission.description,
+            });
+            });
+        });
+        //Lấy danh sách phân quyền từ roles không trùng lặp
+        
+        const permissions = Array.from(permissionsSet.values());
+        const { password: _, ...userWithoutPass } = user;
+
+        return {
+            ...userWithoutPass,
+            permissions,
+        };
+    }
+
+    //Lấy thông tin user theo request
+    async findOneRequest(request:Request): Promise<User> {
+        const id_user = await this.authService.userId(request);
+        const user = await this.findOne(id_user);
+        if (!user) throw new NotFoundException(`User ID ${id_user} không tồn tại`);
+        return user;
+    }
+
+    async updateUser(id: number, dto: UpdateUserDto, request: Request): Promise<User> {
+        const user = await this.findOne(id);
+        if (!user) {
+            throw new NotFoundException(`User ID ${id} không tồn tại`);
+        }
+        if (dto.departmentId) {
+        user.department = await this.departmentRepository.findOne({
+            where: { id: dto.departmentId },
+        });
+        }
+        if (dto.positionId) {
+        user.position = await this.positionRepository.findOne({
+            where: { id: dto.positionId },
+        });
+        }
+        if (dto.roleIds?.length) {
+        user.roles = await this.roleRepository.find({
+            where: { id: In(dto.roleIds) },
+        });
+        }
+
+        user.first_name = dto.first_name ?? user.first_name;
+        user.last_name = dto.last_name ?? user.last_name;
+        user.email = dto.email ?? user.email;
+        user.phone_number = dto.phone_number ?? user.phone_number;
+        user.avatar = dto.avatar ?? user.avatar;
+        user.status = dto.status ?? user.status;
+
+        await this.userRepository.save(user);
+
+        // log
+        const id_user = await this.authService.userId(request);
+        let actor = await this.userRepository.findOne({ where: { id: id_user } });
+        await this.logsService.create({
+        ip_address: request.ip,
+        action: `Cập nhật user ID: ${id}`,
+        users: actor ? actor.user_name : 'system',
+        });
+
+        return user;
+    }
+
+    async changePassword(id: number, newPassword: string, newPasswordConfirm: string, request: Request): Promise<User> {
+        try {
+            const user = await this.findOne(id);
+            if (!user) {
+                throw new NotFoundException(`User ID ${id} không tồn tại`);
+            }
+            if(!await bcrypt.compare(newPassword, user.password)){
+                throw new BadRequestException('INVALID PASSWORD', { cause: new Error(), description: 'INVALID PASSWORD' });
+            }
+
+            if(newPassword !== newPasswordConfirm){
+                throw new BadRequestException('PASSWORD DOES NOT MATCH', { cause: new Error(), description: 'PASSWORD DOES NOT MATCH' });
+            }
+
+            const hashed = await bcrypt.hash(newPassword, 12);
+            await super.update(id,{
+                password: hashed
+            });
+            //log
+            const id_user = await this.authService.userId(request);
+            let actor = await this.userRepository.findOne({ where: { id: id_user } });
+            await this.logsService.create({
+                ip_address: request.ip,
+                action: 'Cập nhật mật khẩu: ' + user.user_name,
+                users: actor ? actor.user_name : 'system',
+            })
+            return await super.findOne({id}, ['department', 'position', 'roles']);
+        }
+        catch (err) {
             throw new InternalServerErrorException(err, { cause: new Error(), description: err });
         }
     }
 
-    async register_user(body, request: Request): Promise<User[]> {
-        if(body.password !== body.password_confirm){
-            throw new UnprocessableEntityException('PASSWORD DOES NOT MATCH', { cause: new Error(), description: 'PASSWORD DOES NOT MATCH' });
+    //Xóa user
+    async remove(id: number, request: Request): Promise<User> {
+        const user = await this.findOne(id);
+        if (!user) {
+            throw new NotFoundException(`User ID ${id} không tồn tại`);
         }
-        
-        if(body.password.length < 6){
-            throw new UnprocessableEntityException('PASSWORD HAS A MINIMUM 6 CHARACTERS', { cause: new Error(), description: 'PASSWORD HAS A MINIMUM 6 CHARACTERS' });
-        }
+        await this.userRepository.remove(user);
 
-        if(body.role === 1){
-            throw new ForbiddenException('INSUFFICIENT AUTHORITY', { cause: new Error(), description: 'INSUFFICIENT AUTHORITY' });
-        }
-        
-        body.password = await bcrypt.hash(body.password, 12);
-        body.password_confirm = body.password;
-        body.status = 'inactive';
-        
-        const resultRegister = await super.create(body);
-
+        const id_user = await this.authService.userId(request);
+        let actor = await this.userRepository.findOne({ where: { id: id_user } });
         await this.logsService.create({
-            ip_address: request.ip,
-            action: 'Đăng ký tài khoản mới: ' + body.user_name,
-            users: resultRegister.user_name,
-        })
+        ip_address: request.ip,
+        action: `Xóa user: ${user.user_name} - ${user.email}`,
+        users: actor ? actor.user_name : 'system',
+        });
 
-        return resultRegister;
+        return user;
     }
 
-    async login_user(user_name: string, password: string, response : Response, request: Request): Promise<User[]> {
-        let user = await super.findOne({user_name:user_name}, ['role', 'department']);
+    async loginUser(user_name: string, password: string, response : Response, request: Request): Promise<User> {
+        let user = await super.findOne({user_name:user_name}, ['department', 'position', 'roles', 'roles.permissions']);
             
         if(!user){
             throw new UnauthorizedException('USERNAME NOT FOUND', { cause: new Error(), description: 'USERNAME NOT FOUND' });
@@ -93,233 +259,73 @@ export class UserService extends AbstractService {
             throw new UnauthorizedException('INCORRECT PASSWORD', { cause: new Error(), description: 'INCORRECT PASSWORD' });
         }
 
-        let permissions = [];
-        if(user.role?.id === null || user.role?.id === undefined || user.department?.id === undefined || user.department?.id === null){
-            permissions = [];
-        }else{
-            permissions = await super.queryPermission({roleId: user.role.id}, {departmentId: user.department.id});
-        }
+        const permissionsSet = new Map<
+            number,
+            { id: number; name: string; description: string }
+        >();
+
+        user.roles.forEach((role) => {
+            role.permissions.forEach((permission) => {
+            permissionsSet.set(permission.id, {
+                id: permission.id,
+                name: permission.name,
+                description: permission.description,
+            });
+            });
+        });
+        //Lấy danh sách phân quyền từ roles không trùng lặp
         
-        const permissionIds = permissions.map(permission => [permission.permissionId, permission.permissionName, permission.permissionDescribe]);
-        user = {
-            ...user,
-            permission: permissionIds
-        };
-        delete user.password;
-        const jwt = await this.jwtService.signAsync({id:user.id});
+        const permissions = Array.from(permissionsSet.values());
+        const { password: _, ...userWithoutPass } = user;
 
-        response.cookie('jwtmvpwebsite', jwt, {httpOnly:true});
+        // 🟢 Tạo JWT access token
+        const accessToken = await this.jwtService.signAsync({ id: user.id });
 
-        await this.logsService.create({
-            ip_address: request.ip,
-            action: 'Đăng nhập: ' + user_name,
-            users: user_name,
-        })
+        // 🟢 (tuỳ chọn) Tạo refresh token
+        const refreshToken = await this.jwtService.signAsync(
+            { id: user.id },
+            { expiresIn: '7d' },
+        );
 
-        return user;
-    }
+        // Lưu refresh token vào cookie
+        response.cookie('jwtmmpmachinelayout', accessToken, { httpOnly: true });
+        response.cookie('refresh_mmpmachinelayout', refreshToken, { httpOnly: true });
 
-    async get_info(request: Request): Promise<User[]> {
-
-        const id = await this.authService.userId(request)
-
-        let user = await super.findOne({id}, ['role', 'department']);
-
-        let permissions = [];
-            if(user.role?.id === null || user.role?.id === undefined || user.department?.id === undefined || user.department?.id === null){
-            permissions = [];
-        }else{
-            permissions = await super.queryPermission({roleId: user.role.id}, {departmentId: user.department.id});
-        }
-        const permissionIds = permissions.map(permission => [permission.permissionId, permission.permissionName, permission.permissionDescribe]);
-        user = {
-            ...user,
-            permission: permissionIds
-        };
-        delete user.password;
-
-        return user;
-    }
-
-    async logout_user(response: Response) {
-        response.clearCookie('jwtmvpwebsite');
         return {
-            message: 'LOGGED OUT',
-        }
+            ...userWithoutPass,
+            permissions,
+            accessToken,
+            refreshToken,
+        };
     }
 
-    async master_create_user(body, request: Request): Promise<User> {
-        try {
-            const masterId = await this.authService.userId(request)
-            let userMasterId = await super.findOne({id: masterId}, ['role', 'department']);
+    //Logout user
+    async logoutUser(response: Response): Promise<{ message: string }> {
+    try {
+        // const id_user = await this.authService.userId(request);
+        // let user = await super.findOne({ id: id_user }, ['department', 'position', 'roles']);
 
-            const password = await bcrypt.hash('123456', 12);
-            const status = 'active';
-            const {...data} = body;
-            const user_name = body.user_name;
-            if(body.role === 1){
-                throw new ForbiddenException('INSUFFICIENT AUTHORITY', { cause: new Error(), description: 'INSUFFICIENT AUTHORITY' });
-            }
-            await super.create({
-                ...data,
-                password,
-                status
-            });
+        // if (!user) {
+        //     throw new UnauthorizedException('USER NOT FOUND');
+        // }
 
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: 'Master tạo tài khoản: ' + user_name,
-                users: userMasterId.user_name,
-            })
+        // Xoá cookie JWT
+        response.clearCookie('jwtmvpwebsite');
 
-            return super.findOne({user_name}, ['role', 'department']);
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
+        // (Optional) Nếu bạn lưu refresh token trong DB thì xoá nó
+        // await this.userTokenRepository.delete({ user: { id: id_user } });
+
+        // Ghi log
+        // await this.logsService.create({
+        //     ip_address: request.ip,
+        //     action: `Đăng xuất tài khoản: ${user.user_name}`,
+        //     users: user.user_name,
+        // });
+
+        return { message: 'Logout successful' };
+    } catch (err) {
+        throw new InternalServerErrorException(err, { cause: new Error(), description: err });
     }
+}
 
-    async master_update_info(id: number, body, request: Request): Promise<User> {
-        try {
-            const masterId = await this.authService.userId(request)
-            let userMasterId = await super.findOne({id: masterId}, ['role', 'department']);
-
-            const {...data} = body;
-            let user = await super.findOne({id}, ['role', 'department']);
-            await super.update(id, {
-                ...data
-            })
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: 'Master cập nhật thông tin tài khoản: ' + user.user_name,
-                users: userMasterId.user_name,
-            })
-            return await super.findOne({id}, ['role', 'department']);
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
-    }
-
-    async master_reset_password(id: number, request: Request): Promise<User> {
-        try {
-            const masterId = await this.authService.userId(request)
-            let userMasterId = await super.findOne({id: masterId}, ['role', 'department']);
-
-            const password = await bcrypt.hash('123456', 12);
-            let user = await super.findOne({id}, ['role', 'department']);
-            await super.update(id, {
-                password
-            })
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: 'Master reset mật khẩu tài khoản: ' + user.user_name,
-                users: userMasterId.user_name,
-            })
-            return await super.findOne({id}, ['role', 'department']);
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
-    }
-
-    async master_delete_user(id: number, request: Request): Promise<User> {
-        try {
-            const masterId = await this.authService.userId(request);
-            let user_master = await super.findOne({id: masterId}, ['role', 'department']);
-            let user = await super.findOne({id}, ['role', 'department']);
-            if(user.role.id === 1){
-                throw new ForbiddenException('INSUFFICIENT AUTHORITY', { cause: new Error(), description: 'INSUFFICIENT AUTHORITY' });
-            }
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: 'Master xóa tài khoản: ' + user.user_name,
-                users: user_master.user_name,
-            })
-            return super.delete(id);
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
-    }
-
-    async update_info(body, request: Request): Promise<User> {
-        try {
-            const id = await this.authService.userId(request);
-            let user = await super.findOne({id}, ['role', 'department']);
-            if(user.role.id !== 1){
-                body.status = 'inactive';
-            }
-            await super.update(id,body);
-
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: 'Cập nhật thông tin cá nhân: ' + user.user_name,
-                users: user.user_name,
-            })
-
-            return await super.findOne({id}, ['role', 'department']);
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
-    }
-
-    async update_password(password_current: string, password: string, password_confirm: string, request: Request): Promise<User> {
-        try {
-            const id = await this.authService.userId(request);
-
-            let user = await super.findOne({id:id});
-
-            if(!await bcrypt.compare(password_current, user.password)){
-                throw new BadRequestException('INVALID PASSWORD', { cause: new Error(), description: 'INVALID PASSWORD' });
-            }
-
-            if(password !== password_confirm){
-                throw new BadRequestException('PASSWORD DOES NOT MATCH', { cause: new Error(), description: 'PASSWORD DOES NOT MATCH' });
-            }
-            
-            const hashed = await bcrypt.hash(password, 12);
-            await super.update(id,{
-                password: hashed
-            });
-
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: 'Cập nhật mật khẩu: ' + user.user_name,
-                users: user.user_name,
-            })
-            return await super.findOne({id}, ['role', 'department']);
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
-    }
-
-    async usersRoom(): Promise<User[]> {
-        try {
-            return await super.all()
-            
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
-    }
-
-    async update_info_role_department(body, request: Request): Promise<User> {
-        try {
-            const id = await this.authService.userId(request);
-            let user = await super.findOne({id}, ['role', 'department']);
-            if(body.role === 1 && user.role.id !== 1){
-                throw new ForbiddenException('INSUFFICIENT AUTHORITY', { cause: new Error(), description: 'INSUFFICIENT AUTHORITY' });
-            }
-            if(user.role.id !== 1){
-                body.status = 'inactive';
-            }
-            await super.update(id,body);
-            // console.log(body);
-            await this.logsService.create({
-                ip_address: request.ip,
-                action: 'Cập nhật thông tin cá nhân bộ phận | chức vụ: ' + user.user_name,
-                users: user.user_name,
-            })
-            return await super.findOne({id}, ['role', 'department']);
-        } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-        }
-    }
-    
 }
