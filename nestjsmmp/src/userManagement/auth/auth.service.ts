@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Injectable, UnauthorizedException, NotAcceptableException} from '@nestjs/common';
@@ -5,25 +6,28 @@ import { Injectable, UnauthorizedException, NotAcceptableException} from '@nestj
 @Injectable()
 export class AuthService {
 
-    constructor(private jwtService : JwtService) {
+    constructor(
+        private jwtService : JwtService,
+        private configService : ConfigService
+    ) {
         
     }
 
-    async userId(request : Request): Promise<number> {
-        // console.log('8');
-        const cookie = request.cookies['jwtmmpmachinelayout'];
-        // console.log(cookie);
-
-        if(!cookie){
-            throw new UnauthorizedException('YOU ARE NOT LOGGED IN', { cause: new Error(), description: 'YOU ARE NOT LOGGED IN' });
+    async userId(request: Request): Promise<number> {
+        const token = request.cookies['jwtmmpmachinelayout'];
+        if (!token) {
+            throw new UnauthorizedException('YOU ARE NOT LOGGED IN');
         }
         try {
-            const decoded = await this.jwtService.verifyAsync(cookie);
-            return decoded['id'];
+            const decoded = await this.jwtService.verifyAsync(token, {
+                secret: this.configService.get<string>('SECRETSJWT'),
+            });
+            if (!decoded || !decoded['sub']) {
+                throw new UnauthorizedException('INVALID TOKEN PAYLOAD');
+            }
+            return decoded['sub'];
+        } catch (err) {
+            throw new UnauthorizedException('ACCESS DENIED');
         }
-        catch(err){
-            throw new NotAcceptableException('ACCESS DENIED', { cause: new Error(), description: 'ACCESS DENIED' });
-        }
-        
     }
 }

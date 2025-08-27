@@ -81,10 +81,7 @@ export class RoleService extends AbstractService {
 
     //Lấy thông tin vai trò theo ID
     async findOne(id: number): Promise<Role> {
-        const role = await this.roleRepository.findOne({
-            where: { id },
-            relations: ['users', 'permissions'],
-        });
+        const role = await super.findOne({ id }, ['permissions']);
         if (!role) {
         throw new NotFoundException(`Role với ID ${id} không tồn tại`);
         }
@@ -129,7 +126,7 @@ export class RoleService extends AbstractService {
         }
     }
 
-    async deleteRole(id: number, request: Request): Promise<Role> {
+    async deleteRole(id: number, request: Request) {
         try {
             const id_user = await this.authService.userId(request);
             let user = await this.userService.findOne( id_user);
@@ -147,8 +144,8 @@ export class RoleService extends AbstractService {
                 action: `Xóa role: ${role.name} - ${role.description} tại ID: ${id}`,
                 users: user.user_name,
             });
-
-            return super.delete(id);
+            await super.delete(id);
+            return { message: 'Xóa vai trò thành công' };
         } catch (err) {
         throw new InternalServerErrorException(err, { cause: new Error(), description: err });
         }

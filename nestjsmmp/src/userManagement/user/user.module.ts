@@ -1,3 +1,4 @@
+import { UserToken } from './../entities/user-tokens.entity';
 import { Role } from './../entities/role.entity';
 import { Position } from './../entities/position.entity';
 import { Department } from './../entities/departments.entity';
@@ -12,7 +13,7 @@ import { UserService } from './user.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Department, Position, Role]),
+    TypeOrmModule.forFeature([User, Department, Position, Role, UserToken]),
     CommonModule,
     AuthModule,
     LogsModule

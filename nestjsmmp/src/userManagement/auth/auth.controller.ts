@@ -28,9 +28,10 @@ export class AuthController {
         @Body('user_name') user_name: string,
         @Body('password') password: string,
         @Res({ passthrough: true }) response: Response,
+        @Req() request: Request
     ): Promise<User> {
         // Ensure loginUser returns a single User, not an array
-        return this.userService.loginUser(user_name, password, response);
+        return this.userService.loginUser(user_name, password, response, request);
     }
 
     //Get info user by token
@@ -46,7 +47,17 @@ export class AuthController {
     @Post('logout')
     async logout(
         @Res({passthrough:true}) response: Response,
+        @Req() request: Request
     ){
-        return this.userService.logoutUser(response);
+        return this.userService.logoutUser(response, request);
+    }
+
+    //REfresh token
+    @Post('refresh')
+    async refreshToken(
+        @Res({passthrough:true}) response: Response,
+        @Req() request: Request
+    ){
+        return this.userService.refreshTokens(response, request);
     }
 }

@@ -19,58 +19,5 @@ export class UserTokenService extends AbstractService{
         super(userTokenRepository);
     }
 
-    // async createDepartment(name: string, request: Request): Promise<Department> {
-    //     try {
-            
-    //         const createDepartment = await super.create({name});
-    //         const id_user = await this.authService.userId(request)
-    //         let user = await this.userService.findOne({id: id_user}, ['role', 'department']);
     
-    //         await this.logsService.create({
-    //             ip_address: request.ip,
-    //             action: 'Đăng ký bộ phận mới: ' + name,
-    //             users: user.user_name,
-    //         })
-    //         return createDepartment;
-    //     } catch (err) {
-    //         throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-    //     }
-    // }
-
-    // async updateDepartment(id: number, name: string, request: Request): Promise<Department> {
-    //     try {
-    //         const departmentOld = await super.findOne({id});
-    //         const updateDepartment = await super.update(id, {name});
-
-    //         const id_user = await this.authService.userId(request)
-    //         let user = await this.userService.findOne({id: id_user}, ['role', 'department']);
-
-    //         await this.logsService.create({
-    //             ip_address: request.ip,
-    //             action: `Sửa bộ phận: ${departmentOld.name} sang ${name} tại department_id: ${id}`,
-    //             users: user.user_name,
-    //         })
-    //         return updateDepartment;
-    //     } catch (err) {
-    //         throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-    //     }
-    // }
-
-    // async deleteDepartment(id: number, request: Request): Promise<Department> {
-    //     try {
-    //         const departmentOld = await super.findOne({id});
-
-    //         const id_user = await this.authService.userId(request)
-    //         let user = await this.userService.findOne({id: id_user}, ['role', 'department']);
-    //         await this.logsService.create({
-    //             ip_address: request.ip,
-    //             action: `Xóa bộ phận: ${departmentOld.name} tại department_id: ${id}` ,
-    //             users: user.user_name,
-    //         })
-
-    //         return super.delete(id);
-    //     } catch (err) {
-    //         throw new InternalServerErrorException(err, { cause: new Error(), description: err });
-    //     }
-    // }
 }

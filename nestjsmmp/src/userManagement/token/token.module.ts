@@ -1,6 +1,5 @@
 import { UserTokenController } from './token.controller';
 import { UserToken } from '../entities/user-tokens.entity';
-import { Position } from '../entities/position.entity';
 import { LogsModule } from '../../master-logs/master-logs.module';
 import { AuthModule } from '../auth/auth.module';
 import { CommonModule } from '../common/common.module';

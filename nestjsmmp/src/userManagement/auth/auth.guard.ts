@@ -9,18 +9,25 @@ export class AuthGuard implements CanActivate {
       private configService : ConfigService
     ){
   }
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const jwt = request.cookies['jwtmmpmachinelayout'];
-    if(!jwt){
-      throw new UnauthorizedException('YOU ARE NOT LOGGED IN', { cause: new Error(), description: 'YOU ARE NOT LOGGED IN' });
-    }
-    try{
-      return this.jwtService.verifyAsync(jwt, {secret: this.configService.get<string>('SECRETSJWT')});
-    }catch(e){
-      // return false;
-      throw new UnauthorizedException('INSUFFICIENT AUTHORITY', { cause: new Error(), description: 'INSUFFICIENT AUTHORITY' });
+    const token = request.cookies['jwtmmpmachinelayout'];
+
+    if (!token) {
+      throw new UnauthorizedException('YOU ARE NOT LOGGED IN');
     }
 
+    try {
+      const decoded = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('SECRETSJWT'),
+      });
+
+      // lưu payload vào request để dùng ở controller/service nếu cần
+      request.user = decoded;
+
+      return true;
+    } catch (err) {
+      throw new UnauthorizedException('INVALID OR EXPIRED TOKEN');
+    }
   }
 }

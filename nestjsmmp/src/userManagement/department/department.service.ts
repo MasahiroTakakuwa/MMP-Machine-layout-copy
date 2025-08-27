@@ -44,17 +44,16 @@ export class DepartmentService extends AbstractService{
 
     //Lấy danh sách tất cả bộ phận
     async findAll(): Promise<Department[]> {
-        return this.departmentRepository.find({ relations: ['users'] });
+        return this.departmentRepository.find();
     }
 
     //Lấy thông tin bộ phận theo ID
     async findOne(id: number): Promise<Department> {
         const department = await this.departmentRepository.findOne({
-        where: { id },
-        relations: ['users'],
+            where: { id }
         });
         if (!department) {
-        throw new NotFoundException(`Bộ phận tương ứng với ID:  ${id} không tìm thấy.`);
+            throw new NotFoundException(`Bộ phận tương ứng với ID:  ${id} không tìm thấy.`);
         }
         return department;
     }

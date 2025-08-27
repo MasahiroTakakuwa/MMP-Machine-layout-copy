@@ -1,6 +1,6 @@
+import { Position } from './../entities/position.entity';
 import { UpdatePositionDto } from './models/update-position.dto';
 import { CreatePositionDto } from './models/create-position.dto';
-import { Department } from '../entities/departments.entity';
 import { AuthGuard } from '../auth/auth.guard';
 import { PositionService } from './position.service';
 import { HasPermission } from '../permission/has-permission.decorator';
@@ -18,19 +18,19 @@ export class PositionController {
     @Post()
     @HasPermission(10)
     @UseGuards(AuthGuard)
-    async create(@Body() dto: CreatePositionDto, @Req() request: Request) {
+    async create(@Body() dto: CreatePositionDto, @Req() request: Request):Promise<Position> {
         return this.positionService.createPosition(dto, request);
     }
         
     //Lấy tất cả các bộ phận
     @Get()
-    findAll() {
+    findAll(): Promise<Position[]> {
         return this.positionService.findAll();
     }
 
     //Lấy bộ phận theo id
     @Get(':id')
-    findOne(@Param('id') id: string) {
+    findOne(@Param('id') id: string): Promise<Position> {
         return this.positionService.findOne(+id);
     }
 
@@ -38,7 +38,7 @@ export class PositionController {
     @Put(':id')
     @HasPermission(10)
     @UseGuards(AuthGuard)
-    async update(@Param('id') id: string, @Body() dto: UpdatePositionDto, @Req() request: Request) {
+    async update(@Param('id') id: string, @Body() dto: UpdatePositionDto, @Req() request: Request): Promise<Position> {
         return this.positionService.updatePosition(+id, dto, request);
     }
     
