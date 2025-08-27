@@ -14,7 +14,7 @@ import { NonAuthGuard } from './app/guards/non-auth.guard';
 
 export const appRoutes: Routes = [
     {
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
         path: '',
         component: AppLayout,
         children: [
@@ -37,7 +37,7 @@ export const appRoutes: Routes = [
     { path: 'notfound', component: Notfound },
     { 
         canActivate: [NonAuthGuard],
-        path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') 
+        path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes')
     },
 
     { path: '**', redirectTo: '/notfound' }

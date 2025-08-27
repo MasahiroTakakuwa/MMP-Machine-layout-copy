@@ -273,7 +273,7 @@ export class UserService extends AbstractService {
         // }
 
         // Xoá cookie JWT
-        response.clearCookie('jwtmvpwebsite');
+        response.clearCookie('jwtmmpmachinelayout');
 
         // (Optional) Nếu bạn lưu refresh token trong DB thì xoá nó
         // await this.userTokenRepository.delete({ user: { id: id_user } });

@@ -63,7 +63,7 @@ import { AuthService } from '../../services/auth.service';
         </div>
     `
 })
-export class Login {
+export class LoginComponent {
     email: string = '';
 
     password: string = '';
