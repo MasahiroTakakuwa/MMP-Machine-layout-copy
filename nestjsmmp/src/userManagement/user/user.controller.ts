@@ -36,6 +36,7 @@ export class UserController {
 
     // update info user in profile
     @Put('change-info/:id')
+    @HasPermission(2)
     async updateInfo(
         @Param('id') id: number,
         @Body() body: UpdateUserDto,

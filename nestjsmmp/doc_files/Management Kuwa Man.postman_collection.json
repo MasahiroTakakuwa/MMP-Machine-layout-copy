@@ -1,0 +1,617 @@
+{
+	"info": {
+		"_postman_id": "910b90b3-1755-4789-b327-326e9c5aacc1",
+		"name": "Management Kuwa Man",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38984308",
+		"_collection_link": "https://galactic-eclipse-229591.postman.co/workspace/formJP~cacf67bd-7847-40a0-9982-316c40c97808/collection/38984308-910b90b3-1755-4789-b327-326e9c5aacc1?action=share&source=collection_link&creator=38984308"
+	},
+	"item": [
+		{
+			"name": "Departments",
+			"item": [
+				{
+					"name": "Lấy danh sách bộ phận",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:33088/api/departments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"departments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy danh sách bộ phận by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:33088/api/departments/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"departments",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Chỉnh sửa bộ phận by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Phòng IFS\",\r\n  \"description\": \"Phụ trách hệ thống công nghệ thông tin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/departments/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"departments",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Đăng ký bộ phận mới",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Phòng IFS test \",\r\n  \"description\": \"Phụ trách hệ thống công nghệ thông tin test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/departments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"departments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Xóa bộ phận",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Phòng IFS\",\r\n  \"description\": \"Phụ trách hệ thống công nghệ thông tin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/departments/9",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"departments",
+								"9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Positions",
+			"item": [
+				{
+					"name": "Lấy danh sách chức vụ",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:33088/api/positions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"positions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy danh sách chức vụ by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:33088/api/positions/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"positions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Chỉnh sửa chức vụ by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Trưởng phòng 1\",\r\n  \"description\": \"Chịu trách nhiệm quản lý phòng ban\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/positions/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"positions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Đăng ký chức vụ mới",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Trưởng phòng test\",\r\n  \"description\": \"Chịu trách nhiệm quản lý phòng ban test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/positions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"positions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Xóa chức vụ",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Phòng IFS\",\r\n  \"description\": \"Phụ trách hệ thống công nghệ thông tin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/positions/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"positions",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Usermanagement",
+			"item": [
+				{
+					"name": "Lấy thông tin người dùng",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:33088/api/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tạo tài khoản người dùng",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_name\": \"EMP002\",\r\n  \"first_name\": \"Ba\",\r\n  \"last_name\": \"Nguyen Van\",\r\n  \"email\": \"ba.nguyen@example.com\",\r\n  \"password\": \"123456@!\",\r\n  \"password_confirm\": \"123456@!\",\r\n  \"departmentId\": 1,\r\n  \"positionId\": 1,\r\n  \"roleIds\": [1], \r\n  \"status\": \"active\",\r\n  \"phone_number\": \"0987654321\",\r\n  \"avatar\": \"https://example.com/avatar.jpg\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_name\": \"EMP002\",\r\n  \"password\": \"123456@!\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles",
+			"item": [
+				{
+					"name": "Lấy danh sách thông tin Role",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:33088/api/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy thông tin Role by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:33088/api/roles/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"roles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tạo vai trò mới",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Admin Test\",\r\n  \"description\": \"Quản trị hệ thống test\",\r\n  \"permissionIds\": [1, 2, 3, 4,5,6,7,8,9,10]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Chỉnh sửa vai trò mới",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Admin Test avc\",\r\n  \"description\": \"Quản trị hệ thống test\",\r\n  \"permissionIds\": [1, 2]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/roles/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"roles",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Xóa vai trò",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Admin Test avc\",\r\n  \"description\": \"Quản trị hệ thống test\",\r\n  \"permissionIds\": [1, 2]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:33088/api/roles/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "33088",
+							"path": [
+								"api",
+								"roles",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
