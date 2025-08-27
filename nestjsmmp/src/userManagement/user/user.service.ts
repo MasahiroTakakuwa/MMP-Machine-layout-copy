@@ -47,23 +47,30 @@ export class UserService extends AbstractService {
         }
     }
 
-    //Tạo mới user
+    // EN: Create a new user. Validate password, hash it, and save user with relations.
+    // JP: 新しいユーザーを作成します。パスワードを検証し、ハッシュ化し、リレーション付きで保存します。
     async createUser(dto: CreateUserDto): Promise<User> {
         try {
-
+            // EN: Password must be at least 6 characters
+            // JP: パスワードは6文字以上である必要があります
             if(dto.password.length < 6){
-                throw new UnprocessableEntityException('PASSWORD HAS A MINIMUM 6 CHARACTERS', { cause: new Error(), description: 'PASSWORD HAS A MINIMUM 6 CHARACTERS' });
+                throw new UnprocessableEntityException('Password must be at least 6 characters long', { cause: new Error(), description: 'Password must be at least 6 characters long' });
             }
 
-            //Kiểm tra password có trùng nhau không
+            // EN: Check if password matches confirmation
+            // JP: 確認用パスワードと一致するかチェックします
             if(dto.password !== dto.password_confirm){
-                throw new UnprocessableEntityException('PASSWORD DOES NOT MATCH', { cause: new Error(), description: 'PASSWORD DOES NOT MATCH' });
+                throw new UnprocessableEntityException('Password confirmation does not match', { cause: new Error(), description: 'Password confirmation does not match' });
             }
 
+            // EN: Hash password with bcrypt
+            // JP: bcryptでパスワードをハッシュ化します
             dto.password = await bcrypt.hash(dto.password, 12);
             dto.password_confirm = dto.password;
             dto.status = 'inactive';
 
+            // EN: Fetch relations (department, position, roles) from DB if provided
+            // JP: 部署・役職・ロールを指定されている場合はDBから取得します
             const department = dto.departmentId
                 ? await this.departmentRepository.findOne({ where: { id: dto.departmentId } })
                 : null;
@@ -76,6 +83,8 @@ export class UserService extends AbstractService {
                 ? await this.roleRepository.find({ where: { id: In(dto.roleIds) } })
                 : [];
 
+            // EN: Create user entity and save
+            // JP: ユーザーエンティティを作成して保存します
             const newUser = this.userRepository.create({
                 user_name: dto.user_name,
                 first_name: dto.first_name,
@@ -106,7 +115,7 @@ export class UserService extends AbstractService {
     //Lấy thông tin user theo ID
     async findOne(id: number): Promise<User> {
         const user = await super.findOne({id}, ['department', 'position', 'roles', 'roles.permissions']);
-        if (!user) throw new NotFoundException(`User ID ${id} không tồn tại`);
+        if (!user) throw new NotFoundException(`User with ID ${id} does not exist.`);
 
         const permissions = [
             ...new Set(
@@ -132,7 +141,7 @@ export class UserService extends AbstractService {
     async updateUser(id: number, dto: UpdateUserDto, request: Request): Promise<User> {
         const user = await this.findOne(id);
         if (!user) {
-            throw new NotFoundException(`User ID ${id} không tồn tại`);
+            throw new NotFoundException(`User with ID ${id} does not exist.`);
         }
         if (dto.departmentId) {
         user.department = await this.departmentRepository.findOne({
@@ -175,14 +184,14 @@ export class UserService extends AbstractService {
         try {
             const user = await this.findOne(id);
             if (!user) {
-                throw new NotFoundException(`User ID ${id} không tồn tại`);
+                throw new NotFoundException(`User with ID ${id} does not exist.`);
             }
             if(!await bcrypt.compare(newPassword, user.password)){
-                throw new BadRequestException('INVALID PASSWORD', { cause: new Error(), description: 'INVALID PASSWORD' });
+                throw new BadRequestException('Current password is incorrect', { cause: new Error(), description: 'Current password is incorrect' });
             }
 
             if(newPassword !== newPasswordConfirm){
-                throw new BadRequestException('PASSWORD DOES NOT MATCH', { cause: new Error(), description: 'PASSWORD DOES NOT MATCH' });
+                throw new BadRequestException('Password confirmation does not match', { cause: new Error(), description: 'Password confirmation does not match' });
             }
 
             const hashed = await bcrypt.hash(newPassword, 12);
@@ -194,7 +203,7 @@ export class UserService extends AbstractService {
             let actor = await this.userRepository.findOne({ where: { id: id_user } });
             await this.logsService.create({
                 ip_address: request.ip,
-                action: 'Cập nhật mật khẩu: ' + user.user_name,
+                action: 'Updated password for user: ' + user.user_name,
                 users: actor ? actor.user_name : 'system',
             })
             return await super.findOne({id}, ['department', 'position', 'roles']);
@@ -208,7 +217,7 @@ export class UserService extends AbstractService {
     async remove(id: number, request: Request): Promise<User> {
         const user = await this.findOne(id);
         if (!user) {
-            throw new NotFoundException(`User ID ${id} không tồn tại`);
+            throw new NotFoundException(`User with ID ${id} does not exist.`);
         }
         await this.userRepository.remove(user);
 
@@ -216,7 +225,7 @@ export class UserService extends AbstractService {
         let actor = await this.userRepository.findOne({ where: { id: id_user } });
         await this.logsService.create({
         ip_address: request.ip,
-        action: `Xóa user: ${user.user_name} - ${user.email}`,
+        action: `Deleted user: ${user.user_name} - ${user.email}`,
         users: actor ? actor.user_name : 'system',
         });
 
@@ -245,32 +254,46 @@ export class UserService extends AbstractService {
         return { accessToken, refreshToken };
     }
 
+    // EN: User login function. Verify username & password, then issue JWT tokens.
+    // JP: ユーザーログイン機能。ユーザー名とパスワードを確認し、JWTトークンを発行します。
     async loginUser(user_name: string, password: string, response : Response, request: Request): Promise<User> {
+        // EN: Find user by username
+        // JP: ユーザー名でユーザーを検索します
         let user = await super.findOne({user_name:user_name}, ['department', 'position', 'roles', 'roles.permissions']);
-            
         if(!user){
-            throw new UnauthorizedException('USERNAME NOT FOUND', { cause: new Error(), description: 'USERNAME NOT FOUND' });
+            throw new UnauthorizedException('User does not exist.', { cause: new Error(), description: 'User does not exist.' });
         }
 
+        // EN: Check if user is active
+        // JP: ユーザーが有効状態か確認します
         if(user.status !== 'active'){
-            throw new ForbiddenException('USERNAME IS NOT ACTIVED', { cause: new Error(), description: 'USERNAME IS NOT ACTIVED' });
+            throw new ForbiddenException('User account is not active.', { cause: new Error(), description: 'User account is not active.' });
         }
 
+        // EN: Compare input password with stored hash
+        // JP: 入力されたパスワードと保存されているハッシュを比較します
         if(!await bcrypt.compare(password, user.password)){
-            throw new UnauthorizedException('INCORRECT PASSWORD', { cause: new Error(), description: 'INCORRECT PASSWORD' });
+            throw new UnauthorizedException('Invalid username or password.', { cause: new Error(), description: 'Invalid username or password.' });
         }
 
+        // EN: Collect unique permissions from user roles
+        // JP: ユーザーロールから権限をユニークに収集します
         const permissions = [
             ...new Set(
                 user.roles.flatMap(role => role.permissions.map(p => p.id))
             )
         ];
+
+        // EN: Remove password before returning user
+        // JP: ユーザーを返す前にパスワードを除外します
         const { password: _, ...userWithoutPass } = user;
 
-        // 🟢 Tạo JWT access token và refresh token
+        // EN: Generate JWT tokens (access + refresh)
+        // JP: JWTトークン（アクセストークン＋リフレッシュトークン）を生成します
         const { accessToken, refreshToken } = await this.generateTokens(user);
 
-        // hash refresh
+        // EN: Store hashed refresh token in DB
+        // JP: ハッシュ化したリフレッシュトークンをDBに保存します
         const tokenRefreshHash = await this.hashToken(refreshToken);
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7d
 
@@ -283,8 +306,8 @@ export class UserService extends AbstractService {
             user_agent: request.headers['user-agent'] || 'unknown',
         }));
 
-        // Lưu refresh token vào cookie
-        // set cookies (HttpOnly)
+        // EN: Send access and refresh token in HttpOnly cookies
+        // JP: アクセストークンとリフレッシュトークンをHttpOnlyクッキーで送信します
         response.cookie('jwtmmpmachinelayout', accessToken, {
             httpOnly: true,
             secure: true,
@@ -308,38 +331,41 @@ export class UserService extends AbstractService {
 
     // Refresh endpoint: xác thực refresh token, rotate
     async refreshTokens(response: Response, request: Request): Promise<{ accessToken: string; refreshToken: string }> {
-        // 1) Lấy refresh token từ cookie
+        // 🔹 Get refresh token from cookie
+        // クッキーからリフレッシュトークンを取得
         const refreshToken = request.cookies['refresh_mmpmachinelayout'];
         if (!refreshToken) {
-            throw new UnauthorizedException('No refresh token provided');
+            throw new UnauthorizedException('Refresh token is missing.');
         }
 
-        // 2) Verify refresh JWT với refresh secret
+        // 🔹 Verify refresh token
+        // リフレッシュトークンを検証
         let payload: any;
         try {
             payload = await this.jwtService.verifyAsync(refreshToken, {
-                secret: this.configService.get<string>('JWT_REFRESH_SECRET'), // <== dùng secret refresh
+                secret: this.configService.get<string>('JWT_REFRESH_SECRET'), 
             });
         } catch {
             throw new UnauthorizedException('Invalid or expired refresh token');
         }
 
-        const userId = Number(payload.sub); // bạn đã ký với { sub: user.id }
+        const userId = Number(payload.sub); // { sub: user.id }
         const user = await this.findOne(userId);
         if (!user) {
             throw new UnauthorizedException('Invalid refresh token');
         }
 
-        // 3) Tìm token của đúng user, chưa bị revoke
+        // 🔹 Check stored refresh tokens in DB
+        // DBに保存されたリフレッシュトークンを確認
         const candidates = await this.userTokenRepository.find({
             where: { user: { id: userId }, revoked: false },
         });
-        // 4) Tìm token khớp bằng cách compare hash + kiểm tra hết hạn DB
+        
         let matched: any = null;
         const now = Date.now();
 
         for (const t of candidates) {
-            // nếu đã quá hạn trong DB thì revoke luôn
+            
             const expiredAt = t.expired_at ? new Date(t.expired_at) : null;
             if (expiredAt && expiredAt.getTime() <= now) {
                 await this.userTokenRepository.update(t.id, { revoked: true });
@@ -353,16 +379,18 @@ export class UserService extends AbstractService {
             }
         }
 
-        // 5) Không tìm thấy token khớp -> detect reuse -> revoke toàn bộ session user
+        
         if (!matched) {
+            // ❌ Reuse or invalid
+            // トークン再利用または不正検出
             await this.userTokenRepository.update({ user: { id: userId } }, { revoked: true });
-            throw new ForbiddenException('Refresh token reuse detected or invalid');
+            throw new ForbiddenException('Invalid refresh token.');
         }
 
-        // 6) Rotation: revoke token cũ
+        // 🔹 Rotate: revoke old, issue new
+        // ローテーション: 古いトークンを無効化、新しいトークンを発行
         await this.userTokenRepository.update(matched.id, { revoked: true });
 
-        // 7) Cấp cặp token mới
         const { accessToken, refreshToken: newRefresh } = await this.generateTokens(user);
         const newHash = await this.hashToken(newRefresh);
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -377,7 +405,6 @@ export class UserService extends AbstractService {
             }),
         );
 
-        // 8) Set cookies mới
         response.cookie('jwtmmpmachinelayout', accessToken, {
             httpOnly: true,
             secure: true,
@@ -413,11 +440,12 @@ export class UserService extends AbstractService {
                 }
             }
 
-            // Clear cookies
+            // 🔹 Clear cookies
+            // クッキーを削除
             response.clearCookie('jwtmmpmachinelayout');
             response.clearCookie('refresh_mmpmachinelayout');
 
-            return { message: 'Đăng xuất thành công' };
+            return { message: 'Successfully logged out.' };
         } catch (err) {
             throw new InternalServerErrorException(err, { cause: new Error(), description: err });
         }
