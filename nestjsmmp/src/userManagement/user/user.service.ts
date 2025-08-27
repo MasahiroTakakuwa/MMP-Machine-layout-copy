@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { UpdateUserDto } from './models/update-user.dto';
 import { Role } from './../entities/role.entity';
 import { Position } from './../entities/position.entity';
@@ -26,6 +27,7 @@ export class UserService extends AbstractService {
         private jwtService: JwtService,
         private authService: AuthService,
         private logsService: LogsService,
+        private configService : ConfigService
     ){
         super(userRepository);
         
@@ -305,61 +307,91 @@ export class UserService extends AbstractService {
     }
 
     // Refresh endpoint: xác thực refresh token, rotate
-    async refreshTokens(refreshToken: string, response: Response, request: Request) {
+    async refreshTokens(response: Response, request: Request): Promise<{ accessToken: string; refreshToken: string }> {
+        // 1) Lấy refresh token từ cookie
+        const refreshToken = request.cookies['refresh_mmpmachinelayout'];
+        if (!refreshToken) {
+            throw new UnauthorizedException('No refresh token provided');
+        }
+
+        // 2) Verify refresh JWT với refresh secret
+        let payload: any;
         try {
-            const payload = this.jwtService.verify(refreshToken); // throws if invalid/expired
-            const userId = Number(payload.sub);
-
-            const user = await this.findOne(userId);
-            if (!user) throw new UnauthorizedException('Invalid refresh token');
-
-            // find stored token record (we need to compare hash)
-            const tokens = await this.userTokenRepository.find({
-                where: { user: { id: userId }, revoked: false },
+            payload = await this.jwtService.verifyAsync(refreshToken, {
+                secret: this.configService.get<string>('JWT_REFRESH_SECRET'), // <== dùng secret refresh
             });
+        } catch {
+            throw new UnauthorizedException('Invalid or expired refresh token');
+        }
 
-            // find matching hash
-            const matched = tokens.find(t => this.compareTokenHash(refreshToken, t.refresh_token));
-            if (!matched) {
-                // reuse detection or token not found => revoke all sessions for safety
-                await this.userTokenRepository.update({ user: { id: userId } }, { revoked: true });
-                throw new ForbiddenException('Refresh token reuse detected or invalid');
+        const userId = Number(payload.sub); // bạn đã ký với { sub: user.id }
+        const user = await this.findOne(userId);
+        if (!user) {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+
+        // 3) Tìm token của đúng user, chưa bị revoke
+        const candidates = await this.userTokenRepository.find({
+            where: { user: { id: userId }, revoked: false },
+        });
+        // 4) Tìm token khớp bằng cách compare hash + kiểm tra hết hạn DB
+        let matched: any = null;
+        const now = Date.now();
+
+        for (const t of candidates) {
+            // nếu đã quá hạn trong DB thì revoke luôn
+            const expiredAt = t.expired_at ? new Date(t.expired_at) : null;
+            if (expiredAt && expiredAt.getTime() <= now) {
+                await this.userTokenRepository.update(t.id, { revoked: true });
+                continue;
             }
 
-            // rotate: revoke current token, create new refresh token
-            matched.revoked = true;
-            await this.userTokenRepository.save(matched);
-
-            const { accessToken, refreshToken: newRefresh } = await this.generateTokens(user);
-            const newHash = await this.hashToken(newRefresh);
-            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-            await this.userTokenRepository.save(this.userTokenRepository.create({
-                user: user,
-                refresh_token: newHash,
-                expired_at: expiresAt,
-                ip_address: request.ip,
-                user_agent: request.headers['user-agent'] || 'unknown',
-            }));
-
-            // set cookies
-            response.cookie('jwtmmpmachinelayout', accessToken, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'lax',
-                maxAge: 30 * 60 * 1000,
-            })
-            response.cookie('refresh_mmpmachinelayout', newRefresh, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
-            return { accessToken, refreshToken: newRefresh };
-        } catch (err) {
-        // nếu token expired/invalid
-            throw err;
+            const same = await this.compareTokenHash(refreshToken, t.refresh_token); // bcrypt.compare
+            if (same) {
+                matched = t;
+                break;
+            }
         }
+
+        // 5) Không tìm thấy token khớp -> detect reuse -> revoke toàn bộ session user
+        if (!matched) {
+            await this.userTokenRepository.update({ user: { id: userId } }, { revoked: true });
+            throw new ForbiddenException('Refresh token reuse detected or invalid');
+        }
+
+        // 6) Rotation: revoke token cũ
+        await this.userTokenRepository.update(matched.id, { revoked: true });
+
+        // 7) Cấp cặp token mới
+        const { accessToken, refreshToken: newRefresh } = await this.generateTokens(user);
+        const newHash = await this.hashToken(newRefresh);
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+        await this.userTokenRepository.save(
+            this.userTokenRepository.create({
+            user,
+            refresh_token: newHash,
+            expired_at: expiresAt,
+            ip_address: request.ip,
+            user_agent: request.headers['user-agent'] || 'unknown',
+            }),
+        );
+
+        // 8) Set cookies mới
+        response.cookie('jwtmmpmachinelayout', accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            maxAge: 30 * 60 * 1000, // 30m
+        });
+        response.cookie('refresh_mmpmachinelayout', newRefresh, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+        });
+
+        return { accessToken, refreshToken: newRefresh };
     }
 
     //Logout user

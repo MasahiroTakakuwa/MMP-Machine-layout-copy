@@ -51,4 +51,13 @@ export class AuthController {
     ){
         return this.userService.logoutUser(response, request);
     }
+
+    //REfresh token
+    @Post('refresh')
+    async refreshToken(
+        @Res({passthrough:true}) response: Response,
+        @Req() request: Request
+    ){
+        return this.userService.refreshTokens(response, request);
+    }
 }
