@@ -7,7 +7,7 @@ import { CreateUserDto } from './models/create-user.dto';
 import { LogsService } from './../../master-logs/master-logs.service';
 import { PaginatedResult } from './../common/paginated-result.interface';
 import { AbstractService } from '../common/abstract.service';
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, UnauthorizedException, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, UnauthorizedException, UnprocessableEntityException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/users.entity';
 import { In, Raw, Repository } from 'typeorm';
@@ -16,6 +16,7 @@ import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth/auth.service';
 import { UserToken } from '../entities/user-tokens.entity';
+import { ChangePasswordrDto } from './models/change-password.dto';
 @Injectable()
 export class UserService extends AbstractService {
     constructor(
@@ -107,9 +108,7 @@ export class UserService extends AbstractService {
 
     //Lấy danh sách tất cả user
     async findAll(): Promise<User[]> {
-        return super.find({
-        relations: ['department', 'position', 'roles', 'roles.permissions'],
-        });
+        return super.find({}, ['department', 'position', 'roles', 'roles.permissions']);
     }
 
     //Lấy thông tin user theo ID
@@ -139,62 +138,70 @@ export class UserService extends AbstractService {
     }
 
     async updateUser(id: number, dto: UpdateUserDto, request: Request): Promise<User> {
-        const user = await this.findOne(id);
-        if (!user) {
-            throw new NotFoundException(`User with ID ${id} does not exist.`);
-        }
-        if (dto.departmentId) {
-        user.department = await this.departmentRepository.findOne({
-            where: { id: dto.departmentId },
-        });
-        }
-        if (dto.positionId) {
-        user.position = await this.positionRepository.findOne({
-            where: { id: dto.positionId },
-        });
-        }
-        if (dto.roleIds?.length) {
-        user.roles = await this.roleRepository.find({
-            where: { id: In(dto.roleIds) },
-        });
-        }
-
-        user.first_name = dto.first_name ?? user.first_name;
-        user.last_name = dto.last_name ?? user.last_name;
-        user.email = dto.email ?? user.email;
-        user.phone_number = dto.phone_number ?? user.phone_number;
-        user.avatar = dto.avatar ?? user.avatar;
-        user.status = dto.status ?? user.status;
-
-        await this.userRepository.save(user);
-
-        // log
-        const id_user = await this.authService.userId(request);
-        let actor = await this.userRepository.findOne({ where: { id: id_user } });
-        await this.logsService.create({
-        ip_address: request.ip,
-        action: `Cập nhật user ID: ${id}`,
-        users: actor ? actor.user_name : 'system',
-        });
-
-        return user;
-    }
-
-    async changePassword(id: number, newPassword: string, newPasswordConfirm: string, request: Request): Promise<User> {
-        try {
+        try{
             const user = await this.findOne(id);
             if (!user) {
                 throw new NotFoundException(`User with ID ${id} does not exist.`);
             }
-            if(!await bcrypt.compare(newPassword, user.password)){
+            if (dto.departmentId) {
+                user.department = await this.departmentRepository.findOne({
+                    where: { id: dto.departmentId },
+                });
+            }
+            if (dto.positionId) {
+                user.position = await this.positionRepository.findOne({
+                    where: { id: dto.positionId },
+                });
+            }
+            if (dto.roleIds?.length) {
+                user.roles = await this.roleRepository.find({
+                    where: { id: In(dto.roleIds) },
+                });
+            }
+
+            user.first_name = dto.first_name ?? user.first_name;
+            user.last_name = dto.last_name ?? user.last_name;
+            user.email = dto.email ?? user.email;
+            user.phone_number = dto.phone_number ?? user.phone_number;
+            user.avatar = dto.avatar ?? user.avatar;
+            user.status = dto.status ?? user.status;
+
+            await this.userRepository.save(user);
+
+            // log
+            const id_user = await this.authService.userId(request);
+            let actor = await this.userRepository.findOne({ where: { id: id_user } });
+            await this.logsService.create({
+                ip_address: request.ip,
+                action: `Cập nhật user ID: ${id}`,
+                users: actor ? actor.user_name : 'system',
+            });
+            return user;
+        } catch(err){
+            throw new InternalServerErrorException(
+                'An unexpected error occurred while updating user.'
+            );
+        }
+        
+    }
+
+    async changePassword(id: number, dto : ChangePasswordrDto, request: Request): Promise<User> {
+        try {
+
+            const user = await super.findOne({id}, ['department', 'position', 'roles', 'roles.permissions']);
+            if (!user) {
+                throw new NotFoundException(`User with ID ${id} does not exist.`);
+            }
+
+            if(!await bcrypt.compare(dto.password_current, user.password)){
                 throw new BadRequestException('Current password is incorrect', { cause: new Error(), description: 'Current password is incorrect' });
             }
 
-            if(newPassword !== newPasswordConfirm){
+            if(dto.password !== dto.password_confirm){
                 throw new BadRequestException('Password confirmation does not match', { cause: new Error(), description: 'Password confirmation does not match' });
             }
 
-            const hashed = await bcrypt.hash(newPassword, 12);
+            const hashed = await bcrypt.hash(dto.password, 12);
             await super.update(id,{
                 password: hashed
             });
@@ -206,30 +213,40 @@ export class UserService extends AbstractService {
                 action: 'Updated password for user: ' + user.user_name,
                 users: actor ? actor.user_name : 'system',
             })
-            return await super.findOne({id}, ['department', 'position', 'roles']);
+            return user;
         }
         catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
+            throw new InternalServerErrorException(
+                'An unexpected error occurred while changing password.'
+            );
         }
     }
 
     //Xóa user
-    async remove(id: number, request: Request): Promise<User> {
-        const user = await this.findOne(id);
-        if (!user) {
-            throw new NotFoundException(`User with ID ${id} does not exist.`);
+    async remove(id: number, request: Request) {
+        try{
+            const user = await this.findOne(id);
+            if (!user) {
+                throw new NotFoundException(`User with ID ${id} does not exist.`);
+            }
+            await this.userRepository.remove(user);
+
+            const id_user = await this.authService.userId(request);
+            let actor = await this.userRepository.findOne({ where: { id: id_user } });
+            await this.logsService.create({
+                ip_address: request.ip,
+                action: `Deleted user: ${user.user_name} - ${user.email}`,
+                users: actor ? actor.user_name : 'system',
+            });
+
+            return { message: 'Delete user account successfully' };
         }
-        await this.userRepository.remove(user);
-
-        const id_user = await this.authService.userId(request);
-        let actor = await this.userRepository.findOne({ where: { id: id_user } });
-        await this.logsService.create({
-        ip_address: request.ip,
-        action: `Deleted user: ${user.user_name} - ${user.email}`,
-        users: actor ? actor.user_name : 'system',
-        });
-
-        return user;
+        catch(err){
+            throw new InternalServerErrorException(
+                'An unexpected error occurred while deleting user.'
+            );
+        }
+        
     }
 
     private async hashToken(token: string) {
@@ -447,7 +464,10 @@ export class UserService extends AbstractService {
 
             return { message: 'Successfully logged out.' };
         } catch (err) {
-            throw new InternalServerErrorException(err, { cause: new Error(), description: err });
+            // throw new InternalServerErrorException(err, { cause: new Error(), description: err });
+            throw new InternalServerErrorException(
+                'An unexpected error occurred while logging out.'
+            );
         }
     }
 
