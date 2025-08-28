@@ -13,27 +13,29 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) { }
   authenticate$(): any {
     return this.http.get<IUser>(this.apiUrl + '/user', {headers: {
-        noRefresh: 'true'
+        // noRefresh: 'true'
       }});
   }
   signin$(user: IUserSignin): Observable<IUser> {
     // return of(true);
-    return this.http.post<IUser>(this.apiUrl + '/login', user);
+    return this.http.post<IUser>(this.apiUrl + '/login', user, {
+      withCredentials: true,
+      headers: {
+        noRefresh: 'true'
+      }});
   }
   signup$(user: IUserSignup): Observable<IUser> {
     return this.http.post<IUser>(this.apiUrl + '/register', user);
   }
-  signout$() {
-    this.http.post(this.apiUrl + '/logout', {}, { withCredentials: true }).subscribe({
-    next: () => {
-      console.log('✅ Logout success, navigating...');
-      this.cleanUp();
-    },
-    error: (err) => {
-      console.error('❌ Logout failed:', err);
-      this.cleanUp();
-    }
-  });
+  signout$() { 
+    this.http.post(this.apiUrl + '/logout', {}, {
+      withCredentials: true,
+      headers: {
+        noRefresh: 'true'
+      }}).subscribe( () => 
+      this.router.navigate(['/auth/login']), 
+      // () => alert('Đã có lỗi xảy ra, xin thử lại') 
+    ) 
   }
   refreshToken$(): Observable<{ accessToken: string }> {
     return this.http.post<{ accessToken: string }>(
@@ -48,11 +50,4 @@ export class AuthService {
     );
   }
 
-  private cleanUp() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
-    
-    console.log('➡️ navigating to /auth/login');
-    this.router.navigate(['/auth/login']).then(ok => console.log('Navigate result:', ok));
-  }
 }

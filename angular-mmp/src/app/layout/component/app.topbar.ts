@@ -6,11 +6,14 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { AuthService } from '../../services/auth.service';
+import { Popover, PopoverModule } from 'primeng/popover';
+import { ButtonModule } from 'primeng/button';
+
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Popover, PopoverModule, ButtonModule],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -77,10 +80,14 @@ import { AuthService } from '../../services/auth.service';
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button> -->
-                    <button type="button" class="layout-topbar-action">
+                    <button type="button" class="layout-topbar-action" (click)="toggleDataTable(op2, $event)">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
+                        
                     </button>
+                    <p-popover #op2 id="overlay_panel">
+                        <p-button label="General Information" icon="pi pi-book" severity="secondary" routerLink="/general-information"/>
+                    </p-popover>
                     <button type="button" class="layout-topbar-action" (click)="onLogout()">
                         <i class="pi pi-sign-out"></i>
                         <span>Logout</span>
@@ -140,5 +147,9 @@ export class AppTopbar {
 
     onLogout(): void {
         this.authService.signout$();
+    }
+
+    toggleDataTable(op: Popover, event: any) {
+        op.toggle(event);
     }
 }
