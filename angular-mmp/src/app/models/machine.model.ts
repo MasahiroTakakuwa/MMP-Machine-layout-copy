@@ -14,6 +14,8 @@
 // 🇻🇳 Đây là interface định nghĩa cấu trúc dữ liệu máy
 // 🇯🇵 このインターフェースは機械データの構造を定義します
 export interface Machine {
+  id: number
+
   machine_no: number;       // 🇻🇳 Tên hoặc mã máy
                             // 🇯🇵 機械の名前または番号
 
@@ -40,4 +42,6 @@ export interface Machine {
 
   performance: number | null; // 🇻🇳 Hiệu suất máy (tính theo thời gian thực)
                               // 🇯🇵 機械のパフォーマンス（リアルタイムで算出）
+
+  schedule_stop_machine: any | null;
 }

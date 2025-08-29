@@ -24,19 +24,41 @@ import { Machine } from '../models/machine.model';                // 📦 Import
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
+import { StatusMachineDialogComponent } from '../shared/components/status-machine-dialog/status-machine-dialog.component';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { Tooltip } from 'primeng/tooltip';
+import { Toast } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-mercury',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule], // ✅ 🇻🇳 Import các module cần thiết | 🇯🇵 必要なモジュールを読み込み
+  imports: [CommonModule, HttpClientModule, FormsModule, DialogModule, Tooltip, Toast], // ✅ 🇻🇳 Import các module cần thiết | 🇯🇵 必要なモジュールを読み込み
   templateUrl: './mercury.component.html',
-  styleUrls: ['./mercury.component.scss']
+  styleUrls: ['./mercury.component.scss'],
+  providers: [DialogService, MessageService]
 })
 export class MercuryComponent implements OnInit, OnDestroy {
   // 🧠 🇻🇳 Mảng lưu danh sách máy được lấy từ API | 🇯🇵 APIから取得された機械のリスト
   machines: Machine[] = [];
   editMode: boolean = false; // ✅ 🇻🇳 Bật/tắt chế độ chỉnh sửa vị trí máy | 🇯🇵 位置編集モードのオン/オフ
-  constructor(private machineService: MachineService) {}
+  ref_dialog!: DynamicDialogRef 
+  listShifts = [
+    {
+      id: 1,
+      name: "Shift Day"
+    },
+    {
+      id: 2,
+      name: "Shift Night"
+    }
+  ]
+  constructor(
+    private machineService: MachineService,
+    public dialogService: DialogService,
+    private messageService: MessageService,
+  ) {}
 
   ngOnInit(): void {
 
@@ -109,7 +131,21 @@ onWheel(event: WheelEvent): void {
     // APIにパラメータ factory = 2 を渡して、Mercury工場のデータを取得する
     this.machineService.getMachines(2).subscribe({
       next: (data) => {
-        this.machines = data;
+        this.machines = data.map(element=>{
+          if(element.schedule_stop_machine){
+            return {
+              ...element,
+              schedule_stop_machine: {
+                ...element.schedule_stop_machine,
+                shift: element.schedule_stop_machine?.shift?this.listShifts.find(e=>e.id==element.schedule_stop_machine?.shift)?.name:'All day',
+                date_end: element.schedule_stop_machine?.date_end??'Undetermined'
+              }
+            }
+          }else{
+            return element
+          }
+          
+        })
       },
       error: (err) => {
         console.error('Lỗi khi gọi API:', err);
@@ -194,5 +230,51 @@ onWheel(event: WheelEvent): void {
     if (event.button === 2) {
       this.isPanning = false;
     }
+  }
+
+  inputDowntime(machine: Machine){
+    this.ref_dialog = this.dialogService.open(StatusMachineDialogComponent, {
+      header: `Update status machine (id: ${machine.id})`,
+      closable: true,
+      modal: true,
+        data: {
+            machine
+        },
+      width: '40%',
+      height: '70%',
+      contentStyle: { overflow: 'auto' },
+    });
+
+    this.ref_dialog.onClose.subscribe(
+      {
+        next: (data)=>{
+          if(data){
+            if(data.type=='save-status-machine'){
+              this.machineService.saveStatusMachine(data.value).subscribe({
+                next: (res)=>{
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Save successfully' });
+                  this.fetchMachines()
+                },
+                error: (error)=>{
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Save error' });
+                }
+              })
+            }else if(data.type=='run-machine'){
+              this.machineService.runMachine(data.value).subscribe({
+                next: (res)=>{
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Set run machine successfully' });
+                  this.fetchMachines()
+                },
+                error: (error)=>{
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Run machine error' });
+                }
+              })
+            }
+            
+          }
+          
+        }
+      }
+    )
   }
 }

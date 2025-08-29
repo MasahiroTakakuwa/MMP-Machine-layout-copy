@@ -112,3 +112,9 @@
   cursor: pointer;
   fill: #ffffff;
 }
+
+::ng-deep .custom-tooltip {
+  max-width: none !important; /* bỏ giới hạn chiều rộng */
+  white-space: normal !important; /* cho phép xuống dòng */
+  width: auto !important; /* rộng theo nội dung */
+}

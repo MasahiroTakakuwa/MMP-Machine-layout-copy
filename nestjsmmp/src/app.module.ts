@@ -6,6 +6,8 @@ import { UserManagementModule } from './userManagement/user-management.module';
 import { LogsModule } from './master-logs/master-logs.module';
 import { ConfigModule } from '@nestjs/config';
 import { typeAsyncOrmMVPConfig } from './configs/configuration.mvp.config';
+import { InputStopMachineModule } from './input-stop-machine/input-stop-machine.module';
+import { MachineModule } from './machine/machine.module';
 @Module({
   imports: [
     ConfigModule.forRoot(
@@ -18,7 +20,9 @@ import { typeAsyncOrmMVPConfig } from './configs/configuration.mvp.config';
     ScheduleModule.forRoot(),
     UserModule,
     UserManagementModule,
-    LogsModule
+    LogsModule,
+    InputStopMachineModule,
+    MachineModule
   ],
   providers: [],
 })
