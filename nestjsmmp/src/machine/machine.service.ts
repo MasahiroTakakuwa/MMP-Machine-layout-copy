@@ -498,6 +498,7 @@ export class MachineService {
     listMachines.forEach(machine=>{
       machine['schedule_stop_machine'] = dataScheduleStopMachine.find(e=> e.machine_status_history_id==machine.id)||null
     })
-    return listMachines
+    if(factory==2) return listMachines
+    else return []
   }
 }
