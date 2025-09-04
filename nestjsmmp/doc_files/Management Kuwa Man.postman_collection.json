@@ -11,7 +11,7 @@
 			"name": "Departments",
 			"item": [
 				{
-					"name": "Lấy danh sách bộ phận",
+					"name": "Get Departments list",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -34,7 +34,7 @@
 					"response": []
 				},
 				{
-					"name": "Lấy danh sách bộ phận by ID",
+					"name": "Get Departments list by ID",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -58,7 +58,7 @@
 					"response": []
 				},
 				{
-					"name": "Chỉnh sửa bộ phận by ID",
+					"name": "Edit Department by ID",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -91,7 +91,7 @@
 					"response": []
 				},
 				{
-					"name": "Đăng ký bộ phận mới",
+					"name": "Register new department",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -123,7 +123,7 @@
 					"response": []
 				},
 				{
-					"name": "Xóa bộ phận",
+					"name": "Delete Department",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -161,7 +161,7 @@
 			"name": "Positions",
 			"item": [
 				{
-					"name": "Lấy danh sách chức vụ",
+					"name": "Get positions list",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -184,7 +184,7 @@
 					"response": []
 				},
 				{
-					"name": "Lấy danh sách chức vụ by ID",
+					"name": "Get positions list by ID",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -208,7 +208,7 @@
 					"response": []
 				},
 				{
-					"name": "Chỉnh sửa chức vụ by ID",
+					"name": "Edit position by ID",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -241,7 +241,7 @@
 					"response": []
 				},
 				{
-					"name": "Đăng ký chức vụ mới",
+					"name": "Register new position",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -273,7 +273,7 @@
 					"response": []
 				},
 				{
-					"name": "Xóa chức vụ",
+					"name": "Delete position",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -311,7 +311,7 @@
 			"name": "Usermanagement",
 			"item": [
 				{
-					"name": "Lấy thông tin người dùng",
+					"name": "Get user information",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -334,7 +334,7 @@
 					"response": []
 				},
 				{
-					"name": "Tạo tài khoản người dùng",
+					"name": "Create user account",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -467,7 +467,7 @@
 			"name": "Roles",
 			"item": [
 				{
-					"name": "Lấy danh sách thông tin Role",
+					"name": "Get Roles list",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -490,7 +490,7 @@
 					"response": []
 				},
 				{
-					"name": "Lấy thông tin Role by ID",
+					"name": "Get Role information by ID",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -514,7 +514,7 @@
 					"response": []
 				},
 				{
-					"name": "Tạo vai trò mới",
+					"name": "Create new role",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -523,7 +523,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Admin Test\",\r\n  \"description\": \"Quản trị hệ thống test\",\r\n  \"permissionIds\": [1, 2, 3, 4,5,6,7,8,9,10]\r\n}\r\n",
+							"raw": "{\r\n  \"name\": \"Admin Test\",\r\n  \"description\": \"System administrator testing\",\r\n  \"permissionIds\": [1, 2, 3, 4,5,6,7,8,9,10]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -546,7 +546,7 @@
 					"response": []
 				},
 				{
-					"name": "Chỉnh sửa vai trò mới",
+					"name": "Edit new role",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -555,7 +555,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Admin Test avc\",\r\n  \"description\": \"Quản trị hệ thống test\",\r\n  \"permissionIds\": [1, 2]\r\n}\r\n",
+							"raw": "{\r\n  \"name\": \"Admin Test avc\",\r\n  \"description\": \"System administrator testing\",\r\n  \"permissionIds\": [1, 2]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -579,7 +579,7 @@
 					"response": []
 				},
 				{
-					"name": "Xóa vai trò",
+					"name": "Delete role",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -588,7 +588,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Admin Test avc\",\r\n  \"description\": \"Quản trị hệ thống test\",\r\n  \"permissionIds\": [1, 2]\r\n}\r\n",
+							"raw": "{\r\n  \"name\": \"Admin Test avc\",\r\n  \"description\": \"System administrator testing\",\r\n  \"permissionIds\": [1, 2]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
