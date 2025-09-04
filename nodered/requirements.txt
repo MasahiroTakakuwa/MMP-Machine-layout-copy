@@ -1,0 +1,4 @@
+node-red-dashboard
+node-red-node-mysql
+node-red-contrib-ui-state-trail
+node-red-node-ui-table

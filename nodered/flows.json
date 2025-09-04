@@ -1,0 +1,592 @@
+[
+    {
+        "id": "293dac1646ce3257",
+        "type": "group",
+        "z": "ce055fbbd3b5fa1f",
+        "name": "Config ",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "f663b2b48dd145ca",
+            "8de2e7a54de60c27",
+            "0630fe69fc1b6222",
+            "1a3ee6101b946419",
+            "4b20a53b9a91e711"
+        ],
+        "x": 194,
+        "y": 259,
+        "w": 832,
+        "h": 122
+    },
+    {
+        "id": "f663b2b48dd145ca",
+        "type": "inject",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "293dac1646ce3257",
+        "name": "On boot",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 300,
+        "y": 300,
+        "wires": [
+            [
+                "8de2e7a54de60c27"
+            ]
+        ]
+    },
+    {
+        "id": "8de2e7a54de60c27",
+        "type": "function",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "293dac1646ce3257",
+        "name": "Query get cavities",
+        "func": "msg.topic = `SELECT * FROM settings WHERE name = 'cavities';`\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 300,
+        "wires": [
+            [
+                "0630fe69fc1b6222"
+            ]
+        ]
+    },
+    {
+        "id": "0630fe69fc1b6222",
+        "type": "mysql",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "293dac1646ce3257",
+        "mydb": "dc96fc4f734fe179",
+        "name": "",
+        "x": 750,
+        "y": 300,
+        "wires": [
+            [
+                "1a3ee6101b946419"
+            ]
+        ]
+    },
+    {
+        "id": "1a3ee6101b946419",
+        "type": "change",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "293dac1646ce3257",
+        "name": "Set cavities",
+        "rules": [
+            {
+                "t": "set",
+                "p": "cavities",
+                "pt": "global",
+                "to": "payload[0].value",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 930,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4b20a53b9a91e711",
+        "type": "inject",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "293dac1646ce3257",
+        "name": "Interval 15 minutes",
+        "props": [],
+        "repeat": "900",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 340,
+        "y": 340,
+        "wires": [
+            [
+                "8de2e7a54de60c27"
+            ]
+        ]
+    },
+    {
+        "id": "dc96fc4f734fe179",
+        "type": "MySQLdatabase",
+        "name": "Database MySQL",
+        "host": "10.0.3.60",
+        "port": "3306",
+        "db": "test_nodered",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "e45ce7aec07eaa4a",
+        "type": "group",
+        "z": "ce055fbbd3b5fa1f",
+        "name": "Test show output",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "2d8934b1020a6919",
+            "e8263b938ed4aa89",
+            "cdcdbff171866b9b",
+            "195ca8d64bf59beb",
+            "904fafce771989fb",
+            "4bcc3ca85854c83c"
+        ],
+        "x": 194,
+        "y": 679,
+        "w": 1112,
+        "h": 122
+    },
+    {
+        "id": "2d8934b1020a6919",
+        "type": "inject",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "e45ce7aec07eaa4a",
+        "name": "Interval 1 minute",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 330,
+        "y": 720,
+        "wires": [
+            [
+                "e8263b938ed4aa89"
+            ]
+        ]
+    },
+    {
+        "id": "e8263b938ed4aa89",
+        "type": "function",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "e45ce7aec07eaa4a",
+        "name": "Query select ouput",
+        "func": "function timestampToDateString(timestamp) {\n    const date = new Date(timestamp);\n    const year = date.getFullYear();\n    const month = String(date.getMonth() + 1).padStart(2, \"0\"); // tháng bắt đầu từ 0\n    const day = String(date.getDate()).padStart(2, \"0\");\n    return `${year}-${month}-${day}`;\n}\nvar now = new Date();\nvar start_filter = timestampToDateString(now) + ' 00:00:00';\nvar end_filter = timestampToDateString(now) + ' 23:59:59';\n\nmsg.topic = `SELECT id,\n    count,\n    DATE_FORMAT(time, '%Y-%m-%d %H:%i:%s') AS time \n    from output where time between '${start_filter}' and '${end_filter}'\n    order by id desc;`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 720,
+        "wires": [
+            [
+                "cdcdbff171866b9b"
+            ]
+        ]
+    },
+    {
+        "id": "cdcdbff171866b9b",
+        "type": "mysql",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "e45ce7aec07eaa4a",
+        "mydb": "dc96fc4f734fe179",
+        "name": "",
+        "x": 770,
+        "y": 720,
+        "wires": [
+            [
+                "195ca8d64bf59beb",
+                "4bcc3ca85854c83c"
+            ]
+        ]
+    },
+    {
+        "id": "195ca8d64bf59beb",
+        "type": "function",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "e45ce7aec07eaa4a",
+        "name": "function 2",
+        "func": "function groupByHour(data) {\n    const result = {};\n\n    data.forEach(item => {\n        const date = new Date(item.time);\n\n        // Lấy yyyy-mm-dd\n        const y = date.getFullYear();\n        const m = String(date.getMonth() + 1).padStart(2, '0');\n        const d = String(date.getDate()).padStart(2, '0');\n\n        // Lấy giờ\n        const h = date.getHours();\n        const hStart = String(h).padStart(2, '0') + \":00:00\";\n        const hEnd = String((h + 1) % 24).padStart(2, '0') + \":00:00\";\n\n        const range = `${y}-${m}-${d} ${hStart} - ${hEnd}`;\n\n        if (!result[range]) {\n            result[range] = 0;\n        }\n        result[range] += item.count;\n    });\n\n    // Chuyển sang array\n    return Object.entries(result).map(([time, count]) => ({ time, count }));\n}\n\nif(msg.payload?.length){\n    msg.payload = groupByHour(msg.payload);\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 720,
+        "wires": [
+            [
+                "904fafce771989fb"
+            ]
+        ]
+    },
+    {
+        "id": "904fafce771989fb",
+        "type": "ui_table",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "e45ce7aec07eaa4a",
+        "group": "b0fed5c6a1dd810e",
+        "name": "OUTPUT BY HOUR",
+        "order": 4,
+        "width": 8,
+        "height": 8,
+        "columns": [],
+        "outputs": 0,
+        "cts": false,
+        "x": 1180,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "4bcc3ca85854c83c",
+        "type": "ui_table",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "e45ce7aec07eaa4a",
+        "group": "b0fed5c6a1dd810e",
+        "name": "OUPUT RECORE",
+        "order": 5,
+        "width": 8,
+        "height": 8,
+        "columns": [],
+        "outputs": 0,
+        "cts": false,
+        "x": 1170,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "b0fed5c6a1dd810e",
+        "type": "ui_group",
+        "name": "OUTPUT",
+        "tab": "8275c9ce12f7b83a",
+        "order": 1,
+        "disp": true,
+        "width": "30",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "8275c9ce12f7b83a",
+        "type": "ui_tab",
+        "name": "Tab 1",
+        "icon": "dashboard",
+        "order": 11
+    },
+    {
+        "id": "fadd8a6e115bfdd9",
+        "type": "group",
+        "z": "ce055fbbd3b5fa1f",
+        "name": "Test trigger",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "a4f450ce40d14e7b",
+            "2e02e6d181642cf9",
+            "2ab77841146e5652",
+            "3429ea79c8b48ca8",
+            "58f8c6bc3df65fe7",
+            "755aff2666f5dbfa"
+        ],
+        "x": 194,
+        "y": 519,
+        "w": 712,
+        "h": 142
+    },
+    {
+        "id": "a4f450ce40d14e7b",
+        "type": "inject",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "fadd8a6e115bfdd9",
+        "name": "Trigger interval",
+        "props": [],
+        "repeat": "10",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 320,
+        "y": 560,
+        "wires": [
+            [
+                "2ab77841146e5652",
+                "58f8c6bc3df65fe7"
+            ]
+        ]
+    },
+    {
+        "id": "2e02e6d181642cf9",
+        "type": "ui_button",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "fadd8a6e115bfdd9",
+        "name": "",
+        "group": "b0fed5c6a1dd810e",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "passthru": false,
+        "label": "Trigger OUPUT",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 320,
+        "y": 620,
+        "wires": [
+            [
+                "2ab77841146e5652",
+                "58f8c6bc3df65fe7"
+            ]
+        ]
+    },
+    {
+        "id": "2ab77841146e5652",
+        "type": "change",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "fadd8a6e115bfdd9",
+        "name": "SET 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "1",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 530,
+        "y": 560,
+        "wires": [
+            [
+                "0058dda8f092c4b4",
+                "755aff2666f5dbfa"
+            ]
+        ]
+    },
+    {
+        "id": "3429ea79c8b48ca8",
+        "type": "change",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "fadd8a6e115bfdd9",
+        "name": "SET 0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 670,
+        "y": 620,
+        "wires": [
+            [
+                "0058dda8f092c4b4",
+                "755aff2666f5dbfa"
+            ]
+        ]
+    },
+    {
+        "id": "58f8c6bc3df65fe7",
+        "type": "delay",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "fadd8a6e115bfdd9",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 540,
+        "y": 620,
+        "wires": [
+            [
+                "3429ea79c8b48ca8"
+            ]
+        ]
+    },
+    {
+        "id": "755aff2666f5dbfa",
+        "type": "ui_statetrail",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "fadd8a6e115bfdd9",
+        "group": "b0fed5c6a1dd810e",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "timeline",
+        "states": [
+            {
+                "state": 1,
+                "col": "#009933",
+                "t": "num",
+                "label": "UP"
+            },
+            {
+                "state": 0,
+                "col": "#999999",
+                "t": "num",
+                "label": "DOWN"
+            }
+        ],
+        "periodLimit": "15",
+        "periodLimitUnit": "60",
+        "timeformat": "HH:mm:ss",
+        "tickmarks": 4,
+        "exactticks": false,
+        "persist": false,
+        "legend": 1,
+        "combine": true,
+        "blanklabel": "",
+        "x": 820,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bd9c4182cff2f9dd",
+        "type": "group",
+        "z": "ce055fbbd3b5fa1f",
+        "name": "Record ouput",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "50a236e4bb12db8d",
+            "9316346d389ad980",
+            "94beb3e7aeaf444b",
+            "0058dda8f092c4b4"
+        ],
+        "x": 194,
+        "y": 399,
+        "w": 1252,
+        "h": 82
+    },
+    {
+        "id": "50a236e4bb12db8d",
+        "type": "rpi-gpio in",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "bd9c4182cff2f9dd",
+        "name": "",
+        "pin": "18",
+        "intype": "tri",
+        "debounce": "25",
+        "read": false,
+        "bcm": true,
+        "x": 270,
+        "y": 440,
+        "wires": [
+            [
+                "0058dda8f092c4b4",
+                "755aff2666f5dbfa"
+            ]
+        ]
+    },
+    {
+        "id": "9316346d389ad980",
+        "type": "function",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "bd9c4182cff2f9dd",
+        "name": "Query OUTPUT",
+        "func": "var cavities = global.get('cavities') || 1;\n// 1 trigger <=> cavities output\nmsg.topic = `INSERT INTO output(count) VALUES (${cavities});`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1100,
+        "y": 440,
+        "wires": [
+            [
+                "94beb3e7aeaf444b"
+            ]
+        ]
+    },
+    {
+        "id": "94beb3e7aeaf444b",
+        "type": "mysql",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "bd9c4182cff2f9dd",
+        "mydb": "dc96fc4f734fe179",
+        "name": "",
+        "x": 1330,
+        "y": 440,
+        "wires": [
+            [
+                "e8263b938ed4aa89"
+            ]
+        ]
+    },
+    {
+        "id": "0058dda8f092c4b4",
+        "type": "switch",
+        "z": "ce055fbbd3b5fa1f",
+        "g": "bd9c4182cff2f9dd",
+        "name": "Filter Pulse Up",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 900,
+        "y": 440,
+        "wires": [
+            [
+                "9316346d389ad980"
+            ]
+        ]
+    }
+]
