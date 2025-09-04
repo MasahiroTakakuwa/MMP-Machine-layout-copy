@@ -15,6 +15,7 @@ export class DepartmentController {
         ){}
 
     // Tạo mới một bộ phận
+    // Create a new department
     @Post()
     @HasPermission(6)
     @UseGuards(AuthGuard)
@@ -23,6 +24,7 @@ export class DepartmentController {
     }
 
     // Lấy tất cả các bộ phận
+    // Get all departments
     @Get()
     findAll(): Promise<Department[]> {
         return this.departmentService.findAll();
@@ -35,6 +37,7 @@ export class DepartmentController {
     }
 
     //cập nhật bộ phận theo id
+    // Update department by id
     @Put(':id')
     @HasPermission(6)
     @UseGuards(AuthGuard)
@@ -47,6 +50,7 @@ export class DepartmentController {
     }
     
     //Xoá bộ phận theo id
+    // Delete department by id
     @Delete(':id')
     @HasPermission(6)
     @UseGuards(AuthGuard)

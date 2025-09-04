@@ -16,6 +16,7 @@ export class RoleController {
     }
 
     // Tạo mới một vai trò và danh sách quyền
+    // Create a new role and list of permissions
     @Post()
     @HasPermission(4)
     @UseGuards(AuthGuard)
@@ -24,12 +25,14 @@ export class RoleController {
     }
 
     //Lấy tất cả các vai trò và quyền
+    // Get all roles and permissions
     @Get()
     async findAll():Promise<Role[]> {
         return this.roleService.findAll();
     }
         
     // Lấy vai trò theo id
+    // Get role by id
     @Get(':id')
     async findOne(@Param('id') id: string) {
         return this.roleService.findOne(+id);

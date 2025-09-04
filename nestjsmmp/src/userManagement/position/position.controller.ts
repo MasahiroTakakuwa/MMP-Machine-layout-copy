@@ -15,6 +15,7 @@ export class PositionController {
         ){}
 
     // Tạo mới một bộ phận
+    // Create a new department
     @Post()
     @HasPermission(10)
     @UseGuards(AuthGuard)
@@ -23,12 +24,14 @@ export class PositionController {
     }
         
     //Lấy tất cả các bộ phận
+    // Get all departments
     @Get()
     findAll(): Promise<Position[]> {
         return this.positionService.findAll();
     }
 
     //Lấy bộ phận theo id
+    // Get department by id
     @Get(':id')
     findOne(@Param('id') id: string): Promise<Position> {
         return this.positionService.findOne(+id);
