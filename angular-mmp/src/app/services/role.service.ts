@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { IPermission } from '../interface/permission';
+import { IDepartment, IPermission, IRolePermission } from '../interface/permission';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -10,17 +10,25 @@ import { environment } from '../../environments/environment';
 export class RoleService {
   apiUrl = environment.apiURL;
   constructor(private http: HttpClient) { }
-  getRoles$(): Observable<IPermission[]> {
-    return this.http.get<IPermission[]>(this.apiUrl + '/roles');
+  getRoles$(): Observable<IRolePermission[]> {
+    return this.http.get<IRolePermission[]>(this.apiUrl + '/roles');
   }
-  getRoleById$(id: number): Observable<IPermission> {
-    return this.http.get<IPermission>(this.apiUrl + '/roles/' + id);
+  getRoleById$(id: number): Observable<IRolePermission> {
+    return this.http.get<IRolePermission>(this.apiUrl + '/roles/' + id);
   }
-  addRole$(name: string): Observable<IPermission> {
-    return this.http.post<IPermission>(this.apiUrl + '/roles', name);
+  addRole$(info: IRolePermission): Observable<IRolePermission> {
+    return this.http.post<IRolePermission>(this.apiUrl + '/roles', {
+      name: info.name,
+      description: info.description,
+      permissionIds: info.permissions.map(per => per.id)
+    });
   }
-  updateRoleById$(info: IPermission): Observable<IPermission> {
-    return this.http.put<IPermission>(this.apiUrl + '/roles/' + info.id, { name: info.name });
+  updateRoleById$(info: IRolePermission): Observable<IRolePermission> {
+    return this.http.put<IRolePermission>(this.apiUrl + '/roles/' + info.id, {
+      name: info.name,
+      description: info.description,
+      permissionIds: info.permissions.map(per => per.id)
+    });
   }
   deleteRoleById$(id: number): Observable<any> {
     return this.http.delete<any>(this.apiUrl + '/roles/' + id);

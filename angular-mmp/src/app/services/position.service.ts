@@ -13,14 +13,14 @@ export class PositionService {
   getPosition$(): Observable<IDepartment[]> {
     return this.http.get<IDepartment[]>(this.apiUrl + '/positions');
   }
-  getPositionById$(id: number): Observable<IPermission> {
-    return this.http.get<IPermission>(this.apiUrl + '/positions/' + id);
+  getPositionById$(id: number): Observable<IDepartment> {
+    return this.http.get<IDepartment>(this.apiUrl + '/positions/' + id);
   }
-  addPosition$(name: string): Observable<IPermission> {
-    return this.http.post<IPermission>(this.apiUrl + '/positions', name);
+  addPosition$(info: IDepartment): Observable<IDepartment> {
+    return this.http.post<IDepartment>(this.apiUrl + '/positions', info);
   }
-  updatePositionById$(info: IPermission): Observable<IPermission> {
-    return this.http.put<IPermission>(this.apiUrl + '/positions/' + info.id, { name: info.name });
+  updatePositionById$(info: IDepartment): Observable<IDepartment> {
+    return this.http.put<IDepartment>(this.apiUrl + '/positions/' + info.id, { name: info.name });
   }
   deletePositionById$(id: number): Observable<any> {
     return this.http.delete<any>(this.apiUrl + '/positions/' + id);

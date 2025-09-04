@@ -1,7 +1,7 @@
 export interface IPermission {
   id: number | string,
   name: string,
-  describe?: string
+  description?: string
 }
 
 export interface IPermissionById {
@@ -15,4 +15,11 @@ export interface IDepartment {
   id: number | string | null,
   name: string,
   description?: string
+}
+
+export interface IRolePermission{
+  id: number | string | null,
+  name: string,
+  description?: string,
+  permissions: IPermission[]
 }
