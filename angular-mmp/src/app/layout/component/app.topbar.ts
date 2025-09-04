@@ -86,7 +86,11 @@ import { ButtonModule } from 'primeng/button';
                         
                     </button>
                     <p-popover #op2 id="overlay_panel">
-                        <p-button label="General Information" icon="pi pi-book" severity="secondary" routerLink="/general-information"/>
+                        <div class="flex flex-col gap-2 p-2">
+                            <p-button label="General Information" icon="pi pi-book" severity="secondary" routerLink="/general-information"/>
+                            <p-button label="Account Management" icon="pi pi-users" severity="secondary" routerLink="/account-management"/>
+                        </div>
+                        
                     </p-popover>
                     <button type="button" class="layout-topbar-action" (click)="onLogout()">
                         <i class="pi pi-sign-out"></i>

@@ -74,7 +74,7 @@ interface ExportColumn {
         AutoCompleteModule,
         Chip
     ],
-    providers: [DepartmentService, DepartmentService, RoleService],
+    providers: [DepartmentService, PositionService, RoleService, PermissionService],
     template: `
         <p-toast />
         <p-confirmdialog [style]="{ width: '450px' }"></p-confirmdialog>

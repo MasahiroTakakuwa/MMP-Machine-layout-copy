@@ -12,6 +12,7 @@ import { SaturnComponent } from './app/saturn/saturn.component';
 import { AuthGuard } from './app/guards/auth.guard';
 import { NonAuthGuard } from './app/guards/non-auth.guard';
 import { GeneralInformation } from './app/pages/account-management/generalInformation';
+import { AccountManagement } from './app/pages/account-management/accountManagement';
 
 export const appRoutes: Routes = [
     {
@@ -33,6 +34,7 @@ export const appRoutes: Routes = [
             // 🇻🇳 Các route tương ứng với từng nhà máy (component).
             // 🇯🇵 それぞれの工場ページに対応するルート定義です。
             { path: 'general-information', component: GeneralInformation },
+            { path: 'account-management', component: AccountManagement },
 
         ]
     },

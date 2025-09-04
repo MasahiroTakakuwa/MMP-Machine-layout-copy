@@ -1,12 +1,11 @@
 import { IPermission } from "./permission"
 
 export interface IUser {
-  id: number,
+  id: number | null,
   user_name: string,
   first_name: string,
   last_name: string,
   email: string,
-  lib_line?: any | null,
   status: string,
   created_at: string,
   role?: IPermission | number,
