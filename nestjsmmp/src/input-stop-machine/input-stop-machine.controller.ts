@@ -8,16 +8,19 @@ export class InputStopMachineController {
         private inputStopMachineService: InputStopMachineService
     ){}
 
+    //api to save schedule stop machine
     @Post('save-status-machine')
-    async saveStatusMachine(@Body() body: SaveScheduleStopMachineDto){
+    async saveStatusMachine(@Body() body: SaveScheduleStopMachineDto){ //SaveScheduleStopMachineDto is used to validate data come in
         return this.inputStopMachineService.saveScheduleStopMachine(body)
     }
 
+    //api to set Run status of machine
     @Put('run-machine/:id')
     async runMachine(@Param('id') id: number){
         return this.inputStopMachineService.runMachine(id)
     }
 
+    //api to get schedule history
     @Get('history/:id')
     async getHistoryStopMachine(@Param('id') id: number){
         return this.inputStopMachineService.getHistoryStopMachine(id)

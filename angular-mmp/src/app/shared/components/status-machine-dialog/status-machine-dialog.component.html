@@ -1,26 +1,34 @@
+<!-- This dialog has two tabs. First tab is default to show-->
 <p-tabs value="0">
     <p-tablist>
+        <!-- Name of first tab -->
         <p-tab value="0">Update Status</p-tab>
+        <!-- Name of second tab -->
         <p-tab value="1">History Status</p-tab>
     </p-tablist>
     <p-tabpanels>
+        <!-- First Tab is Input Schedule Stop Machine -->
         <p-tabpanel value="0">
             <form [formGroup]="formData">
+                <!-- input date start -->
                 <p-fluid class="card flex items-center gap-4" style="margin-bottom: 0 !important; padding-bottom: 1rem;">
                     <label class="font-semibold w-24">Date start<span style="color: red;">*</span></label>
                     <div class="flex flex-col flex-1 gap-1">
                     <p-datepicker [readonlyInput]="true" dateFormat="dd/mm/yy" formControlName="date_start" class="w-full md:w-80"/>
+                    <!-- this text will appear when date start empty -->
                     @if (isInvalid('date_start')) {
                         <p-message severity="error" size="small" variant="simple">Date start is required.</p-message>
                     }
                     </div>
                     
                 </p-fluid>
+                <!-- input date end -->
                 <p-fluid class="card flex items-center gap-4" style="margin-bottom: 0 !important; padding-bottom: 1rem;">
                     <label class="font-semibold w-24">Date end</label>
                     <p-datepicker [readonlyInput]="true" dateFormat="dd/mm/yy" formControlName="date_end" class="w-full md:w-80"/>
                 </p-fluid>
 
+                <!-- input shift -->
                 <p-fluid class="card flex items-center gap-4" style="margin-bottom: 0 !important;padding-bottom: 1rem;">
                     <label class="font-semibold w-24">Shift</label>
                     <div class="flex flex-col flex-1 gap-1">
@@ -29,10 +37,12 @@
                     </div>
                     
                 </p-fluid>
+                <!-- input reason stop machine -->
                 <p-fluid class="card flex items-center gap-4" style="margin-bottom: 0 !important;">
                     <label class="font-semibold w-24">Content<span style="color: red;">*</span></label>
                     <div class="flex flex-col flex-1 gap-1">
                     <textarea rows="5"cols="30" formControlName="content" pTextarea [autoResize]="true" class="w-full md:w-80"></textarea>
+                    <!-- this text will show when content empty -->
                     @if (isInvalid('content')) {
                         <p-message severity="error" size="small" variant="simple">Content is required.</p-message>
                     }
@@ -41,16 +51,20 @@
                 </p-fluid>
                 <div class="flex justify-between">
                     <div>
+                        <!-- button to set Run status. This button will disable if this machine has no schedule stop machine -->
                         <p-button severity="success" label="Run machine" [disabled]="!machine.schedule_stop_machine" (click)="setRunMachine()"/>
                     </div>
                     <div class="flex justify-end gap-2">
+                        <!-- close button -->
                         <p-button label="Cancel" severity="secondary" (click)="close()" />
+                        <!-- save button. This button will disable if data input are invalid -->
                         <p-button label="Save" (click)="saveStatusMachine()" [disabled]="formData.invalid"/>
                     </div>
                 </div>
                 
             </form>
         </p-tabpanel>
+        <!-- Second tab is table of history stop machine -->
         <p-tabpanel value="1">
             <div class="card">
                 <p-table [value]="listDowntimeHistory" stripedRows showGridlines [tableStyle]="{'width': '100%', 'min-height': '23rem'}">
@@ -63,6 +77,7 @@
                             <th>Content</th>
                         </tr>
                     </ng-template>
+                    <!-- loop render row data of  listDowntimeHistory-->
                     <ng-template #body let-downtime let-rowIndex="rowIndex">
                         <tr>
                             <td>{{rowIndex+1}}</td>

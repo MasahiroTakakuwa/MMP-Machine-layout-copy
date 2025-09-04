@@ -17,15 +17,12 @@
 // ==============================================================================
 
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, IsNull, EntityManager, In } from 'typeorm';
-import { MachineStatusHistory } from './models/machine-status-history.entity';
+import { EntityManager, In } from 'typeorm';
 import { ScheduleStopMachineCurrent } from 'src/input-stop-machine/models/schedule-stop-machine-current.entity';
 
 @Injectable()
 export class MachineService {
   constructor(
-    private dataSource: DataSource,
     private entityManager: EntityManager
 
     // @InjectRepository(MachineStatusHistory)
@@ -116,6 +113,7 @@ export class MachineService {
   // }
 
   async getMachinePerformanceSummary(factory: number){
+    //this is demo data of machine
     let listMachines= [
       {
         id:1,
@@ -490,14 +488,17 @@ export class MachineService {
         performance: Math.random()
       },
     ]
+    //get data schedule stop machine current with above machines
     let dataScheduleStopMachine= await this.entityManager.find(ScheduleStopMachineCurrent,{
       where: {
         machine_status_history_id: In(listMachines.map(m=>m.id))
       }
     })
+    // stack schedule stop machine to each machine (because there is not relationship)
     listMachines.forEach(machine=>{
       machine['schedule_stop_machine'] = dataScheduleStopMachine.find(e=> e.machine_status_history_id==machine.id)||null
     })
+    //demo for mercury
     if(factory==2) return listMachines
     else return []
   }

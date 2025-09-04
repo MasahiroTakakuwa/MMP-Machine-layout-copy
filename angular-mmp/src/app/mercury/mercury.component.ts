@@ -43,7 +43,9 @@ export class MercuryComponent implements OnInit, OnDestroy {
   // 🧠 🇻🇳 Mảng lưu danh sách máy được lấy từ API | 🇯🇵 APIから取得された機械のリスト
   machines: Machine[] = [];
   editMode: boolean = false; // ✅ 🇻🇳 Bật/tắt chế độ chỉnh sửa vị trí máy | 🇯🇵 位置編集モードのオン/オフ
+  //variable data return of dialog
   ref_dialog!: DynamicDialogRef 
+  //list shifts
   listShifts = [
     {
       id: 1,
@@ -54,7 +56,7 @@ export class MercuryComponent implements OnInit, OnDestroy {
       name: "Shift Night"
     }
   ]
-  constructor(
+  constructor( //declare service used in this component
     private machineService: MachineService,
     public dialogService: DialogService,
     private messageService: MessageService,
@@ -137,8 +139,8 @@ onWheel(event: WheelEvent): void {
               ...element,
               schedule_stop_machine: {
                 ...element.schedule_stop_machine,
-                shift: element.schedule_stop_machine?.shift?this.listShifts.find(e=>e.id==element.schedule_stop_machine?.shift)?.name:'All day',
-                date_end: element.schedule_stop_machine?.date_end??'Undetermined'
+                shift: element.schedule_stop_machine?.shift?this.listShifts.find(e=>e.id==element.schedule_stop_machine?.shift)?.name:'All day', //if shift is not null, get shift name. Else, set to all day
+                date_end: element.schedule_stop_machine?.date_end??'Undetermined'  //if date_end is null, set to Undetermined
               }
             }
           }else{
@@ -233,40 +235,41 @@ onWheel(event: WheelEvent): void {
   }
 
   inputDowntime(machine: Machine){
+    //open dialog to input information of Schedule Stop Machine. This dialog is used to save schedule stop machine and set machine to Run status
     this.ref_dialog = this.dialogService.open(StatusMachineDialogComponent, {
-      header: `Update status machine (id: ${machine.id})`,
-      closable: true,
-      modal: true,
-        data: {
+      header: `Update status machine (id: ${machine.id})`,  //header of dialog
+      closable: true,  //display symbol X on top right of dialog
+      modal: true,   //blur area outside dialog
+        data: {  // data passed to dialog
             machine
         },
-      width: '40%',
-      height: '70%',
-      contentStyle: { overflow: 'auto' },
+      width: '40%',  //width of dialog
+      height: '70%',  //height of dialog
+      contentStyle: { overflow: 'auto' }, //if content overflow, a scrollbar appears
     });
 
     this.ref_dialog.onClose.subscribe(
       {
         next: (data)=>{
           if(data){
-            if(data.type=='save-status-machine'){
+            if(data.type=='save-status-machine'){ //save schedule stop machine
               this.machineService.saveStatusMachine(data.value).subscribe({
                 next: (res)=>{
-                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Save successfully' });
-                  this.fetchMachines()
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Save successfully' }); //show notify success
+                  this.fetchMachines() //reload data after save schedule stop machine
                 },
                 error: (error)=>{
-                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Save error' });
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Save error' }); //show notify error
                 }
               })
-            }else if(data.type=='run-machine'){
+            }else if(data.type=='run-machine'){ //set machine to Run status
               this.machineService.runMachine(data.value).subscribe({
                 next: (res)=>{
-                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Set run machine successfully' });
-                  this.fetchMachines()
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Set run machine successfully' }); //show notify success
+                  this.fetchMachines() //reload data after set Run status of machine
                 },
                 error: (error)=>{
-                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Run machine error' });
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Run machine error' }); //show notify error
                 }
               })
             }

@@ -114,7 +114,7 @@
 }
 
 ::ng-deep .custom-tooltip {
-  max-width: none !important; /* bỏ giới hạn chiều rộng */
-  white-space: normal !important; /* cho phép xuống dòng */
-  width: auto !important; /* rộng theo nội dung */
+  max-width: none !important; /* no limit width */
+  white-space: normal !important; /* allow line breaks */
+  width: auto !important; /* Width varies with content */
 }

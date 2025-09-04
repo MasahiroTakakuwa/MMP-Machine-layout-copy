@@ -8,6 +8,6 @@ import { ScheduleStopMachineHistory } from './models/schedule-stop-machine-histo
 @Module({
   controllers: [InputStopMachineController],
   providers: [InputStopMachineService],
-  imports: [TypeOrmModule.forFeature([ScheduleStopMachineCurrent, ScheduleStopMachineHistory])]
+  imports: [TypeOrmModule.forFeature([ScheduleStopMachineCurrent, ScheduleStopMachineHistory])]  //import entities (table) to use in module
 })
 export class InputStopMachineModule {}
