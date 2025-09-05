@@ -17,22 +17,25 @@
 // ==============================================================================
 
 import { Injectable } from '@nestjs/common';
-import { EntityManager, In } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { ScheduleStopMachineCurrent } from 'src/input-stop-machine/models/schedule-stop-machine-current.entity';
+import { MachineStatusHistory } from './models/machine-status-history.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class MachineService {
   constructor(
-    private entityManager: EntityManager
-
+    private entityManager: EntityManager,
     // @InjectRepository(MachineStatusHistory)
     // private readonly machineRepo: Repository<MachineStatusHistory>, // ✅ Truy cập entity từ DB
-    //                                                                 // ✅ データベースのエンティティにアクセス
+                                                                    // ✅ データベースのエンティティにアクセス
   ) {}
 
   // ============================================================================
   // 📊 Tính hiệu suất các máy thuộc một nhà máy cụ thể (factory)
   // 📈 指定された工場の設備一覧と稼働率を取得する
+  // Addition schedule stop machine
+  // When use this function, uncomment at above 'constructor' and uncomment in file app.module.ts, machine.module.ts
   // ============================================================================
   // async getMachinePerformanceSummary(factory: number) {
   //   const now = new Date();
@@ -47,6 +50,7 @@ export class MachineService {
   //   const result = await this.machineRepo
   //     .createQueryBuilder('m')
   //     .select([
+  //       'm.id AS id',
   //       'm.factory_type AS factory_type',
   //       'm.machine_no AS machine_no',
   //       'm.machine_type AS machine_type',
@@ -68,6 +72,13 @@ export class MachineService {
   //   // ==========================================================================
   //   const nowTime = now.getTime();
   //   const shiftStart = today0800.getTime();
+
+  //   //get data schedule stop machine current with above machines
+  //   let dataScheduleStopMachine= await this.entityManager.find(ScheduleStopMachineCurrent,{
+  //     where: {
+  //       machine_status_history_id: In(result.filter(m=>m.machine_type==40).map(m=>m.id))
+  //     }
+  //   })
 
   //   return result.map(row => {
   //     if (row.machine_type === 40) {
@@ -93,6 +104,7 @@ export class MachineService {
   //         performance: parseFloat(performance.toFixed(4)),
   //         // ✅ Làm tròn performance đến 4 chữ số thập phân
   //         // ✅ パフォーマンスを小数点以下4桁までに丸める
+  //         schedule_stop_machine: dataScheduleStopMachine.find(e=> e.machine_status_history_id==row.id)||null  //match schedule for each machine
   //       };
   //     } else {
   //       // ✅ Các máy không phải loại 40 thì không tính hiệu suất
@@ -112,7 +124,7 @@ export class MachineService {
   //   });
   // }
 
-  async getMachinePerformanceSummary(factory: number){
+  async getMachinePerformanceSummaryDemo(factory: number){
     //this is demo data of machine
     let listMachines= [
       {

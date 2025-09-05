@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { typeAsyncOrmMVPConfig } from './configs/configuration.mvp.config';
 import { InputStopMachineModule } from './input-stop-machine/input-stop-machine.module';
 import { MachineModule } from './machine/machine.module';
+import { typeAsyncOrmMMPMachineConfig } from './configs/configuration-machine.mmp.config';
 @Module({
   imports: [
     ConfigModule.forRoot(
@@ -17,6 +18,7 @@ import { MachineModule } from './machine/machine.module';
       }
     ),
     TypeOrmModule.forRootAsync(typeAsyncOrmMVPConfig),
+    // TypeOrmModule.forRoot(typeAsyncOrmMMPMachineConfig), //register for second database SQL server
     ScheduleModule.forRoot(),
     UserModule,
     UserManagementModule,

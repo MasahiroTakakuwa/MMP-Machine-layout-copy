@@ -26,6 +26,6 @@ export class MachineController {
   // ============================================================================
   @Get()
   getSummary(@Query('factory') factory: number) {
-    return this.machineService.getMachinePerformanceSummary(factory);
+    return this.machineService.getMachinePerformanceSummaryDemo(factory);
   }
 }

@@ -6,12 +6,8 @@ import { MachineService } from './machine.service';
 
 @Module({
     imports: [
-
         // ==========================================================================
-        // 📦 Đăng ký entity cho các repository sử dụng @InjectRepository()
-        //    @InjectRepository() で使用するエンティティを登録
-        // ==========================================================================
-        // TypeOrmModule.forFeature([MachineStatusHistory])
+        // TypeOrmModule.forFeature([MachineStatusHistory],'machine_mmp') // register entity together with name of config of second database SQL server
     ],
     // ============================================================================
     // 🎮 Controller điều khiển API
