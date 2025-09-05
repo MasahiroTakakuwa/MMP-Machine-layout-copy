@@ -75,8 +75,7 @@ interface ExportColumn {
         MessageModule,
         InputTextModule,
         AutoCompleteModule,
-        MultiSelect,
-        Chip
+        MultiSelect,        
     ],
     providers: [DepartmentService, PositionService, RoleService, UsersService],
     template: `
