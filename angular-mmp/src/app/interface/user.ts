@@ -1,4 +1,4 @@
-import { IPermission } from "./permission"
+import { IDepartment, IPermission, IRolePermission } from "./permission"
 
 export interface IUser {
   id: number | null,
@@ -45,13 +45,63 @@ export interface IStaff {
 }
 
 export interface IUserManagement {
-  index: number, 
+  id: number | null,
+  // index: number, 
   user_name: string, 
   last_name: string, 
   first_name: string, 
-  email: string, 
-  department: IPermission, 
-  role: IPermission, 
-  boss: string, 
+  email: string,
+  status: string,
+  phone_number: string,
+  avatar: string,
+  department: IDepartment | null,
+  position: IDepartment | null,
+  role: IRolePermission[], 
+  // boss: string,
+}
+
+export interface IUserRequest {
+  id?: number | null,
+  user_name: string,
+  first_name: string,
+  last_name: string,
+  email: string,
+  phone_number?: string,
+  password?: string,
+  password_confirm?: string,
+  avatar?: string,
+  departmentId?: number | null,
+  positionId?: number | null,
+  roleIds?: number[],
   status: string
+}
+
+export interface IUserCreateRequest {
+  user_name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  password_confirm: string;
+  departmentId: number | null;
+  positionId: number | null;
+  roleIds: number[];
+  status: string;
+  phone_number?: string;
+  avatar?: string;
+}
+
+export interface IUserUpdateRequest {
+  id: number;
+  user_name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  departmentId: number | null;
+  positionId: number | null;
+  roleIds: number[];
+  status: string;
+  phone_number?: string;
+  avatar?: string;
+  password?: string; // optional, chỉ gửi nếu muốn đổi
 }

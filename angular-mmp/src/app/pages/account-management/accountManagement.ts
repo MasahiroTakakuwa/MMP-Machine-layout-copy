@@ -29,7 +29,8 @@ import { PermissionService } from '../../services/permission.service';
 import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { UsersService } from '../../services/users.service';
-import { IUser, IUserManagement } from '../../interface/user';
+import { IUser, IUserCreateRequest, IUserManagement, IUserRequest, IUserUpdateRequest } from '../../interface/user';
+import { MultiSelect } from 'primeng/multiselect';
 
 interface Column {
     field: string;
@@ -74,9 +75,10 @@ interface ExportColumn {
         MessageModule,
         InputTextModule,
         AutoCompleteModule,
+        MultiSelect,
         Chip
     ],
-    providers: [DepartmentService, RoleService, UsersService],
+    providers: [DepartmentService, PositionService, RoleService, UsersService],
     template: `
         <p-toast />
         <p-confirmdialog [style]="{ width: '450px' }"></p-confirmdialog>
@@ -89,7 +91,7 @@ interface ExportColumn {
                     <p-tabpanel value="0">
                         <p-toolbar styleClass="mb-6">
                             <ng-template #start>
-                                <!-- <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNewUser()" /> -->
+                                <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNewUser()" />
                             </ng-template>
 
                             <ng-template #end>
@@ -164,10 +166,10 @@ interface ExportColumn {
                                         Roles
                                         <p-sortIcon field="roles" />
                                     </th>
-                                    <th pSortableColumn="CreatedAt" style="min-width: 8rem">
+                                    <!-- <th pSortableColumn="CreatedAt" style="min-width: 8rem">
                                         Created At
                                         <p-sortIcon field="CreatedAt" />
-                                    </th>
+                                    </th> -->
                                     <th style="min-width: 12rem"></th>
                                 </tr>
                             </ng-template>
@@ -199,38 +201,138 @@ interface ExportColumn {
                                         </ng-container>
                                         <ng-template #noRole>-</ng-template>
                                     </td>
-                                    <td>{{ user.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                    <!-- <td>{{ user.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</td> -->
                                     <td>
-                                        <!-- <p-button icon="pi pi-pencil" class="mr-2"
+                                        <p-button icon="pi pi-pencil" class="mr-2"
                                                 [rounded]="true" [outlined]="true"
                                                 (click)="editUser(user)" />
                                         <p-button icon="pi pi-trash" severity="danger"
                                                 [rounded]="true" [outlined]="true"
-                                                (click)="deleteUser(user)" /> -->
+                                                (click)="deleteUser(user)" />
                                     </td>
                                 </tr>
                             </ng-template>
                         </p-table>
 
-                        <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Account Details" [modal]="true">
+                        <p-dialog [(visible)]="userDialog" [style]="{ width: '600px' }" header="Account Details" [modal]="true">
                             <ng-template #content>
-                                <div class="flex flex-col gap-6">
+                                <div class="flex flex-col gap-4">
+                                    
+                                    <!-- User Name -->
                                     <div>
-                                        <label for="name" class="block font-bold mb-3">Name</label>
-                                        <input type="text" pInputText id="name" [(ngModel)]="user.user_name" required autofocus fluid />
-                                        <small class="text-red-500" *ngIf="submittedUser && !user.user_name">Name is required.</small>
+                                        <label for="user_name" class="block font-bold mb-2">User Name</label>
+                                        <input type="text" pInputText id="user_name" [(ngModel)]="user.user_name" required autofocus />
+                                        <small class="text-red-500" *ngIf="submittedUser && !user.user_name">User Name is required.</small>
                                     </div>
+
+                                    <!-- First Name -->
                                     <div>
-                                        <label for="description" class="block font-bold mb-3">Description</label>
-                                        <textarea id="description" pTextarea [(ngModel)]="user.status" required rows="3" cols="20" fluid></textarea>
+                                        <label for="first_name" class="block font-bold mb-2">First Name</label>
+                                        <input type="text" pInputText id="first_name" [(ngModel)]="user.first_name" required />
+                                        <small class="text-red-500" *ngIf="submittedUser && !user.first_name">First Name is required.</small>
                                     </div>
+
+                                    <!-- Last Name -->
+                                    <div>
+                                        <label for="last_name" class="block font-bold mb-2">Last Name</label>
+                                        <input type="text" pInputText id="last_name" [(ngModel)]="user.last_name" required />
+                                        <small class="text-red-500" *ngIf="submittedUser && !user.last_name">Last Name is required.</small>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div>
+                                        <label for="email" class="block font-bold mb-2">Email</label>
+                                        <input type="email" pInputText id="email" [(ngModel)]="user.email" required />
+                                        <small class="text-red-500" *ngIf="submittedUser && !user.email">Email is required.</small>
+                                    </div>
+
+                                    <!-- Phone -->
+                                    <div>
+                                        <label for="phone_number" class="block font-bold mb-2">Phone Number</label>
+                                        <input type="text" pInputText id="phone_number" [(ngModel)]="user.phone_number" />
+                                    </div>
+
+                                    <!-- Password -->
+                                    <div *ngIf="!isEditMode">
+                                        <label for="password" class="block font-bold mb-2">Password</label>
+                                        <input 
+                                            type="password" 
+                                            pInputText 
+                                            id="password" 
+                                            name="password"
+                                            [(ngModel)]="user.password"
+                                            (ngModelChange)="validatePasswords()"
+                                            required />
+                                        </div>
+
+                                        <!-- Confirm Password -->
+                                        <div *ngIf="!isEditMode">
+                                        <label for="password_confirm" class="block font-bold mb-2">Confirm Password</label>
+                                        <input 
+                                            type="password" 
+                                            pInputText 
+                                            id="password_confirm" 
+                                            name="password_confirm"
+                                            [(ngModel)]="user.password_confirm" 
+                                            (ngModelChange)="validatePasswords()"
+                                            required />
+                                        <small class="text-red-500" *ngIf="passwordMismatch">
+                                            Passwords do not match.
+                                        </small>
+                                    </div>
+
+                                    <!-- Department -->
+                                    <div>
+                                        <label for="department" class="block font-bold mb-2">Department</label>
+                                        <select id="department" class="w-full border rounded p-2" [(ngModel)]="user.departmentId">
+                                            <option value="">-- Select Department --</option>
+                                            <option *ngFor="let dept of departments" [value]="dept.id">{{ dept.name }}</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Position -->
+                                    <div>
+                                        <label for="position" class="block font-bold mb-2">Position</label>
+                                        <select id="position" class="w-full border rounded p-2" [(ngModel)]="user.positionId">
+                                            <option value="">-- Select Position --</option>
+                                            <option *ngFor="let pos of positions" [value]="pos.id">{{ pos.name }}</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Roles -->
+                                    <div>
+                                        <label for="roles" class="block font-bold mb-2">Roles</label>
+                                        <p-multiSelect 
+                                            [options]="roles"
+                                            optionLabel="name" 
+                                            optionValue="id" 
+                                            [(ngModel)]="user.roleIds"
+                                            placeholder="Select Roles"
+                                            display="chip">
+                                        </p-multiSelect>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div>
+                                        <label for="status" class="block font-bold mb-2">Status</label>
+                                        <select id="status" class="w-full border rounded p-2" [(ngModel)]="user.status">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Avatar -->
+                                    <div>
+                                        <label for="avatar" class="block font-bold mb-2">Avatar URL</label>
+                                        <input type="text" pInputText id="avatar" [(ngModel)]="user.avatar" />
+                                    </div>
+
                                 </div>
                             </ng-template>
 
                             <ng-template #footer>
                                 <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialogUser()" />
-                                <!-- <p-button label="Save" icon="pi pi-check" (click)="saveDepartment()" /> -->
-                                
+                                <p-button label="Save" icon="pi pi-check" (click)="saveUser()" />
                             </ng-template>
                         </p-dialog>
 
@@ -248,7 +350,19 @@ export class AccountManagement implements OnInit {
 
     users = signal<IUserManagement[]>([]);
 
-    user!: IUserManagement;
+    user!: IUserRequest;
+
+    departments: IDepartment[] = [];
+    
+    positions: IDepartment[] = [];
+  
+    roles: IRolePermission[] = [];
+
+    department!: IDepartment;
+
+    position!: IDepartment;
+
+    role!: IRolePermission[];
 
     autoFilteredValue: IRolePermission[] = [];
 
@@ -264,8 +378,15 @@ export class AccountManagement implements OnInit {
 
     cols!: Column[];
 
+    isEditMode: boolean = false;
+
+    passwordMismatch: boolean = false;
+
     constructor(
         private usersService: UsersService,
+        private departmentService: DepartmentService,
+        private positionService: PositionService,
+        private roleService: RoleService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -276,6 +397,15 @@ export class AccountManagement implements OnInit {
 
     ngOnInit() {
         this.loadUser();
+        this.loadDepartments();
+        this.loadPositions();
+        this.loadRoles();
+    }
+
+    validatePasswords() {
+        if (!this.isEditMode) {
+            this.passwordMismatch = this.user.password !== this.user.password_confirm;
+        }
     }
 
     loadUser() {
@@ -303,27 +433,72 @@ export class AccountManagement implements OnInit {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
+    loadDepartments() {
+        this.departmentService.getDepartments$().subscribe((data: IDepartment[]) => {
+            this.departments = data;
+        });
+    }
+
+    loadPositions() {
+        this.positionService.getPosition$().subscribe((data: IDepartment[]) => {
+            this.positions = data;
+        });
+    }
+
+    loadRoles() {
+        this.roleService.getRoles$().subscribe((data: IRolePermission[]) => {
+            this.roles = data;
+        });
+    }
+
 
     onGlobalFilter(event: any, table: Table) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
-    // openNewUser() {
-    //     this.user = {
-    //         id: null,
-    //         name: "",
-    //         description: ""
-    //     };
+    openNewUser() {
+        this.user = {
+            id: null,
+            user_name: "",
+            first_name: "",
+            last_name: "",
+            email: "",
+            phone_number: "",
+            password: "",
+            password_confirm: "",
+            avatar: "",
+            departmentId: null,
+            positionId: null,
+            roleIds: [],
+            status: "active",
+        };
 
-    //     this.submittedUser = false;
-    //     this.userDialog = true;
-    // }
+        this.isEditMode = false; // <-- create thì false
+        this.submittedUser = false;
+        this.userDialog = true;
+    }
 
 
-    // editUser(user: IUser) {
-    //     this.user = { ...user };
-    //     this.userDialog = true;
-    // }
+    editUser(user: IUserManagement) {
+        this.user = {
+            id: user.id,
+            user_name: user.user_name,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone_number: user.phone_number ?? "",
+            avatar: user.avatar ?? "",
+            departmentId: user.department ? Number(user.department.id) : null,
+            positionId: user.position ? Number(user.position.id) : null,
+            roleIds: user.role ? user.role.map(r => Number(r.id)) : [],
+            status: user.status,
+            password: "",            // bỏ trống khi edit
+            password_confirm: ""     // bỏ trống khi edit
+        };
+
+        this.isEditMode = true; // <-- edit thì true
+        this.userDialog = true;
+    }
 
 
     hideDialogUser() {
@@ -332,7 +507,7 @@ export class AccountManagement implements OnInit {
     }
 
 
-    deleteUser(user: IUser) {
+    deleteUser(user: IUserManagement) {
         this.confirmationService.confirm({
             message: 'Are you sure you want to delete ' + user.user_name + '?',
             header: 'Confirm',
@@ -342,7 +517,7 @@ export class AccountManagement implements OnInit {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Successful',
-                        detail: 'Department Deleted',
+                        detail: 'User Deleted',
                         // life: 3000
                     });
                 this.loadUser()
@@ -352,17 +527,17 @@ export class AccountManagement implements OnInit {
         });
     }
 
-    // findIndexById(id: string): number {
-    //     let index = -1;
-    //     for (let i = 0; i < this.users().length; i++) {
-    //         if (this.users()[i].id === id) {
-    //             index = i;
-    //             break;
-    //         }
-    //     }
+    findIndexById(id: number): number {
+        let index = -1;
+        for (let i = 0; i < this.users().length; i++) {
+            if (this.users()[i].id === id) {
+                index = i;
+                break;
+            }
+        }
 
-    //     return index;
-    // }
+        return index;
+    }
 
     createId(): string {
         let id = '';
@@ -386,40 +561,113 @@ export class AccountManagement implements OnInit {
         }
     }
 
-    // saveDepartment() {
-    //     this.submittedUser = true;
-    //     let _users = this.users();
-    //     if (this.user.user_name?.trim()) {
-    //         if (this.user.id) {
-    //             this.usersService.updateUserById$(this.user).subscribe((res) => {
-    //                 this.messageService.add({
-    //                     severity: 'success',
-    //                     summary: 'Successful',
-    //                     detail: 'Department Updated',
-    //                     life: 3000
-    //                 });
-    //                 this.loadUser()
-    //             })
-                
-    //         } else {
-    //             this.usersService.addUser$(this.user).subscribe((res) => {
-    //                 this.messageService.add({
-    //                     severity: 'success',
-    //                     summary: 'Successful',
-    //                     detail: 'Department Created',
-    //                     life: 3000
-    //                 });
-    //                 this.loadUser()
-    //             })
-    //         }
+    saveUser() {
+        this.submittedUser = true;
 
-    //         this.userDialog = false;
-    //         this.user = {
-    //             id: null,
-    //             name: "",
-    //             description: ""
-    //         };
-    //     }
-    // }
+        // validate cơ bản
+        if (!this.user.user_name || !this.user.email) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'User name and Email are required'
+            });
+            return;
+        }
+
+        if (this.isEditMode) {
+            // ------------------ UPDATE ------------------
+            const updateRequest: IUserUpdateRequest = {
+                id: this.user.id!,
+                user_name: this.user.user_name,
+                first_name: this.user.first_name,
+                last_name: this.user.last_name,
+                email: this.user.email,
+                departmentId: this.user.departmentId ? Number(this.user.departmentId) : null,
+                positionId: this.user.positionId ? Number(this.user.positionId) : null,
+                roleIds: this.user.roleIds || [],
+                status: this.user.status,
+                phone_number: this.user.phone_number,
+                avatar: this.user.avatar
+            };
+
+            // Nếu user có nhập password mới thì gửi thêm
+            if (this.user.password && this.user.password.trim() !== '') {
+                (updateRequest as any).password = this.user.password;
+            }
+
+            this.usersService.updateUserById$(updateRequest).subscribe({
+                next: () => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Successful',
+                        detail: 'User Updated'
+                    });
+                    this.loadUser();
+                    this.userDialog = false;
+                },
+                error: err => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: err.error?.message || 'Update failed'
+                    });
+                }
+            });
+
+        } else {
+            // ------------------ CREATE ------------------
+            if (!this.user.password || !this.user.password_confirm) {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Password and Confirm Password are required'
+                });
+                return;
+            }
+
+            if (this.user.password !== this.user.password_confirm) {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Passwords do not match'
+                });
+                return;
+            }
+
+            const createRequest: IUserCreateRequest = {
+                user_name: this.user.user_name,
+                first_name: this.user.first_name,
+                last_name: this.user.last_name,
+                email: this.user.email,
+                password: this.user.password,
+                password_confirm: this.user.password_confirm,
+                departmentId: this.user.departmentId ? Number(this.user.departmentId) : null,
+                positionId: this.user.positionId ? Number(this.user.positionId) : null,
+                roleIds: this.user.roleIds || [],
+                status: this.user.status,
+                phone_number: this.user.phone_number,
+                avatar: this.user.avatar
+            };
+
+            this.usersService.addUser$(createRequest).subscribe({
+                next: () => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Successful',
+                        detail: 'User Created'
+                    });
+                    this.loadUser();
+                    this.userDialog = false;
+                },
+                error: err => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: err.error?.message || 'Create failed'
+                    });
+                }
+            });
+        }
+    }
 
 }

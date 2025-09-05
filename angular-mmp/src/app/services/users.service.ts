@@ -22,7 +22,7 @@ export class UsersService {
     return this.http.get<IStaff[]>(this.apiUrl + '/boss');
   }
   addUser$(info: any): Observable<any> {
-    return this.http.post(this.apiUrl + '/users', info);
+    return this.http.post(this.apiUrl + '/register', info);
   }
   updatePassword$(password: { password: string, password_confirm: string }): Observable<IUser> {
     return this.http.put<IUser>(this.apiUrl + '/users/password', password);
@@ -34,7 +34,7 @@ export class UsersService {
     return this.http.put<IUser>(this.apiUrl + '/users/edit/role-department', info);
   }
   updateUserById$(info: any): Observable<IUser> {
-    return this.http.put<IUser>(this.apiUrl + '/users/' + info.id, info);
+    return this.http.put<IUser>(this.apiUrl + '/users/change-info/' + info.id, info);
   }
   deleteUserById$(id: number): Observable<any> {
     return this.http.delete(this.apiUrl + '/users/' + id);
