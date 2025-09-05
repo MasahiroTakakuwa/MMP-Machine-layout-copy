@@ -93,6 +93,7 @@ export class MachineService {
   //                                               // ✅ 最大パフォーマンスを1（100%）に制限
 
   //       return {
+  //         id: row.id,
   //         machine_no: row.machine_no,
   //         x: row.x,
   //         y: row.y,
@@ -110,6 +111,7 @@ export class MachineService {
   //       // ✅ Các máy không phải loại 40 thì không tính hiệu suất
   //       // ✅ タイプ40以外の機械は稼働率を計算しない
   //       return {
+  //         id: row.id,
   //         machine_no: row.machine_no,
   //         x: row.x,
   //         y: row.y,
