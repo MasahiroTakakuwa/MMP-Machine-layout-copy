@@ -141,6 +141,7 @@ src/app/mercury/mercury.component.html
             <!-- There is tooltip to show information of schedule stop machine -->
             <!-- If there is schedule stop machine, the ellipse will filled by grey color -->
             <!-- There is click event to show dialog input schedule stop machine -->
+             <!-- user có quyền số 11 có thể click mở dialog-->
             <ellipse [pTooltip]="'Stop machine\nFrom date: ' + machine.schedule_stop_machine?.date_start + 
                                 '\nTo date: ' + machine.schedule_stop_machine?.date_end + 
                                 '\nShift: ' + machine.schedule_stop_machine?.shift + 
@@ -151,7 +152,7 @@ src/app/mercury/mercury.component.html
               [attr.cy]="machine.y + 20"
               [attr.fill]="machine.schedule_stop_machine?'#ccc':getPerformanceColor(machine.performance)"
               class="machine-ellipse"
-              (click)="inputDowntime(machine)"
+              (click)="userPermissions.includes(11)&&inputDowntime(machine)"
             />
             <text [pTooltip]="'Stop machine\nFrom date: ' + machine.schedule_stop_machine?.date_start + 
                               '\nTo date: ' + machine.schedule_stop_machine?.date_end +
@@ -163,7 +164,7 @@ src/app/mercury/mercury.component.html
               [attr.y]="machine.y + 35"
               class="performance-text"
               text-anchor="middle"
-              (click)="inputDowntime(machine)"
+              (click)="userPermissions.includes(11)&&inputDowntime(machine)"
             >
               {{ machine.schedule_stop_machine? 'Stop':((machine.performance ?? 0) * 100 | number:'1.1-1' )+'%'}}
             </text>

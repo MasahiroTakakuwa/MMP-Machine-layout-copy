@@ -30,6 +30,7 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Tooltip } from 'primeng/tooltip';
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { UsersService } from '../services/users.service';
 
 @Component({
   selector: 'app-mercury',
@@ -56,14 +57,20 @@ export class MercuryComponent implements OnInit, OnDestroy {
       name: "Shift Night"
     }
   ]
+  userPermissions:any[]=[] //mảng chứa quyền của user đang đăng nhập
   constructor( //declare service used in this component
     private machineService: MachineService,
     public dialogService: DialogService,
     private messageService: MessageService,
+    private userService: UsersService
   ) {}
 
   ngOnInit(): void {
-
+    //gọi api lấy thông tin user
+    this.userService.selectedUser.subscribe(
+      res => {
+        this.userPermissions = res.permission.map((item:any) => item[0]); //trích xuất quyền của user
+      });
     // 📥 🇻🇳 Gọi API khi component khởi tạo | 🇯🇵 コンポーネント初期化時にAPIを呼び出す
     this.fetchMachines();
 
