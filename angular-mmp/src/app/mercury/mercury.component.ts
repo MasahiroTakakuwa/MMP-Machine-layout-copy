@@ -69,7 +69,7 @@ export class MercuryComponent implements OnInit, OnDestroy {
     //gọi api lấy thông tin user
     this.userService.selectedUser.subscribe(
       res => {
-        this.userPermissions = res.permission.map((item:any) => item[0]); //trích xuất quyền của user
+        this.userPermissions = res.permissions //trích xuất quyền của user
       });
     // 📥 🇻🇳 Gọi API khi component khởi tạo | 🇯🇵 コンポーネント初期化時にAPIを呼び出す
     this.fetchMachines();
