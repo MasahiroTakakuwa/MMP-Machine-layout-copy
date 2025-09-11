@@ -13,35 +13,37 @@
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity({ name: 'dbo.DE_TBL_運転状態履歴' }) // ✅ Bảng gốc trên SQL Server
-                                           // ✅ SQL Server上の実テーブル名
+//@Entity({ name: 'machine_status_history' }) // ✅ Bảng gốc trên MySQL
+                                            // ✅ MySQL上の実テーブル名
+
+@Entity('machine_status_history')
 export class MachineStatusHistory {
-  @PrimaryGeneratedColumn({ name: '連番' })
+  @PrimaryGeneratedColumn({ name: 'ID' })
   id: number;
   // ✅ 🇻🇳 Số thứ tự tự tăng (primary key)
   // ✅ 🇯🇵 自動増分の連番（主キー）
 
-  @Column({ name: '工場区分' })
+  @Column({ name: 'factory_type' })
   factory_type: number;
   // ✅ 🇻🇳 Phân loại nhà máy (VD: 2 = Mercury)
   // ✅ 🇯🇵 工場の区分（例：2 = Mercury）
 
-  @Column({ name: '機器番号' })
+  @Column({ name: 'machine_no' })
   machine_no: number;
   // ✅ 🇻🇳 Mã thiết bị (số máy)
   // ✅ 🇯🇵 設備番号（マシン番号）
 
-  @Column({ name: '機器区分' })
+  @Column({ name: 'machine_type' })
   machine_type: number;
   // ✅ 🇻🇳 Phân loại thiết bị (VD: 40 = cuối line có counter)
   // ✅ 🇯🇵 設備の種類（例：40 = カウンター付きのライン終端）
 
-  @Column({ name: '運転状態' })
+  @Column({ name: 'status' })
   status: number;
   // ✅ 🇻🇳 Trạng thái hoạt động (1 = chạy, 0 = dừng)
   // ✅ 🇯🇵 稼働状態（1 = 稼働中、0 = 停止）
 
-  @Column({ name: '生産数' })
+  @Column({ name: 'production' })
   counter: number;
   // ✅ 🇻🇳 Sản lượng lũy kế từ 08:00 trong ngày
   // ✅ 🇯🇵 当日08:00以降の累積生産数
@@ -61,7 +63,7 @@ export class MachineStatusHistory {
   // ✅ 🇻🇳 Tọa độ Y trên sơ đồ layout
   // ✅ 🇯🇵 レイアウト上のY座標
 
-  @Column({ name: '更新日時', type: 'datetime' })
+  @Column({ name: 'updated_at', type: 'datetime' })
   updated_at: Date;
   // ✅ 🇻🇳 Thời điểm cập nhật gần nhất
   // ✅ 🇯🇵 最新の更新日時（データ更新タイムスタンプ）

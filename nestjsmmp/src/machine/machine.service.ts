@@ -26,8 +26,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class MachineService {
   constructor(
     private entityManager: EntityManager,
-    // @InjectRepository(MachineStatusHistory)
-    // private readonly machineRepo: Repository<MachineStatusHistory>, // ✅ Truy cập entity từ DB
+    @InjectRepository(MachineStatusHistory)
+    private readonly machineRepo: Repository<MachineStatusHistory>, // ✅ Truy cập entity từ DB
                                                                     // ✅ データベースのエンティティにアクセス
   ) {}
 
@@ -37,94 +37,97 @@ export class MachineService {
   // Addition schedule stop machine
   // When use this function, uncomment at above 'constructor' and uncomment in file app.module.ts, machine.module.ts
   // ============================================================================
-  // async getMachinePerformanceSummary(factory: number) {
-  //   const now = new Date();
-  //   const today0800 = new Date(now);
-  //   today0800.setHours(8, 0, 0, 0); // ✅ Cố định thời gian bắt đầu ca
-  //                                   // ✅ シフト開始時刻を08:00に固定
+  async getMachinePerformanceSummary(factory: number) {
+    const now = new Date();
+    const today0800 = new Date(now);
+    today0800.setHours(8, 0, 0, 0); // ✅ Cố định thời gian bắt đầu ca
+                                    // ✅ シフト開始時刻を08:00に固定
 
-  //   // ==========================================================================
-  //   // 🧮 Truy vấn dữ liệu mới nhất từ bảng DE_TBL_運転状態履歴 (group theo máy)
-  //   // 🗂️ 設備ごとの最新情報を取得（GROUP BYで集約）
-  //   // ==========================================================================
-  //   const result = await this.machineRepo
-  //     .createQueryBuilder('m')
-  //     .select([
-  //       'm.id AS id',
-  //       'm.factory_type AS factory_type',
-  //       'm.machine_no AS machine_no',
-  //       'm.machine_type AS machine_type',
-  //       'MAX(m.updated_at) AS last_updated',
-  //       'MAX(m.status) AS status',
-  //       'MAX(m.counter) AS counter',
-  //       'MAX(m.ct) AS ct',
-  //       'MAX(m.x) AS x',
-  //       'MAX(m.y) AS y'
-  //     ])
-  //     .where('m.factory_type = :factory', { factory })
-  //     .andWhere('m.updated_at >= :startTime', { startTime: today0800 })
-  //     .groupBy('m.factory_type, m.machine_no, m.machine_type')
-  //     .getRawMany();
+    // ==========================================================================
+    // 🧮 Truy vấn dữ liệu mới nhất từ bảng DE_TBL_運転状態履歴 (group theo máy)
+    // 🗂️ 設備ごとの最新情報を取得（GROUP BYで集約）
+    // ==========================================================================
+    const result = await this.machineRepo
+      .createQueryBuilder('m')
+      .select([
+        'm.id AS id',
+        'm.factory_type AS factory_type',
+        'm.machine_no AS machine_no',
+        'm.machine_type AS machine_type',
+        'MAX(m.updated_at) AS last_updated',
+        'MAX(m.status) AS status',
+        'MAX(m.counter) AS counter',
+        'MAX(m.ct) AS ct',
+        'MAX(m.x) AS x',
+        'MAX(m.y) AS y'
+      ])
+      .where('m.factory_type = :factory', { factory })
+      // .andWhere('m.updated_at >= :startTime', { startTime: today0800 })
+      .groupBy('m.factory_type, m.machine_no, m.machine_type')
+      .getRawMany();
 
   //   // ==========================================================================
   //   // ⏱️ Chuẩn bị thời gian để tính performance
   //   // 🕒 稼働率の計算に必要な時間情報を取得
   //   // ==========================================================================
-  //   const nowTime = now.getTime();
-  //   const shiftStart = today0800.getTime();
+    const nowTime = now.getTime();
+    const shiftStart = today0800.getTime();
 
-  //   //get data schedule stop machine current with above machines
-  //   let dataScheduleStopMachine= await this.entityManager.find(ScheduleStopMachineCurrent,{
-  //     where: {
-  //       machine_status_history_id: In(result.filter(m=>m.machine_type==40).map(m=>m.id))
-  //     }
-  //   })
+    //get data schedule stop machine current with above machines
+    let dataScheduleStopMachine= await this.entityManager.find(ScheduleStopMachineCurrent,{
+      where: {
+        machine_status_history_id: In(result.filter(m=>m.machine_type==40).map(m=>m.id))
+      }
+    })
 
-  //   return result.map(row => {
-  //     if (row.machine_type === 40) {
-  //       // ✅ Tính số giây thực tế từ 08:00 đến hiện tại
-  //       // ✅ 08:00 から現在までの経過秒数を計算
-  //       const runningSec = (nowTime - shiftStart) / 1000;
+    return result.map(row => {
+      if (row.machine_type === 40) {
+        // ✅ Tính số giây thực tế từ 08:00 đến hiện tại
+        // ✅ 08:00 から現在までの経過秒数を計算
+        const runningSec = (nowTime - shiftStart) / 1000;
 
-  //       // ✅ Công thức: counter / (thời gian chạy thực tế / CT)
-  //       // ✅ 式： 生産数 ÷（経過時間 / サイクルタイム）
-  //       let performance = row.ct > 0 ? row.counter / (runningSec / row.ct) : 0;
-  //       if (performance > 1) {performance = 1}  // ✅ Giới hạn hiệu suất tối đa là 1 (100%)
-  //                                               // ✅ 最大パフォーマンスを1（100%）に制限
+        // ✅ Công thức: counter / (thời gian chạy thực tế / CT)
+        // ✅ 式： 生産数 ÷（経過時間 / サイクルタイム）
+        // let performance = row.ct > 0 ? row.counter / (runningSec / row.ct) : 0;
+        // if (performance > 1) {performance = 1}  // ✅ Giới hạn hiệu suất tối đa là 1 (100%)
+        //                                         // ✅ 最大パフォーマンスを1（100%）に制限
 
-  //       return {
-  //         id: row.id,
-  //         machine_no: row.machine_no,
-  //         x: row.x,
-  //         y: row.y,
-  //         status: row.status,
-  //         ct: row.ct,
-  //         machine_type: row.machine_type,
-  //         hour: now.getHours(),
-  //         counter: row.counter,
-  //         performance: parseFloat(performance.toFixed(4)),
-  //         // ✅ Làm tròn performance đến 4 chữ số thập phân
-  //         // ✅ パフォーマンスを小数点以下4桁までに丸める
-  //         schedule_stop_machine: dataScheduleStopMachine.find(e=> e.machine_status_history_id==row.id)||null  //match schedule for each machine
-  //       };
-  //     } else {
-  //       // ✅ Các máy không phải loại 40 thì không tính hiệu suất
-  //       // ✅ タイプ40以外の機械は稼働率を計算しない
-  //       return {
-  //         id: row.id,
-  //         machine_no: row.machine_no,
-  //         x: row.x,
-  //         y: row.y,
-  //         status: row.status,
-  //         ct: null,
-  //         machine_type: row.machine_type,
-  //         hour: null,
-  //         counter: null,
-  //         performance: null,
-  //       };
-  //     }
-  //   });
-  // }
+        return {
+          id: row.id,
+          machine_no: row.machine_no,
+          x: row.x,
+          y: row.y,
+          //status: row.status,
+          status: Math.round(Math.random()),        // デモ用に0か1を表示
+          ct: row.ct,
+          machine_type: row.machine_type,
+          hour: now.getHours(),
+          counter: row.counter,
+          performance: Math.random(),               // デモ用に0から1未満の数字をランダム表示
+          //performance: parseFloat(performance.toFixed(4)),
+          // ✅ Làm tròn performance đến 4 chữ số thập phân
+          // ✅ パフォーマンスを小数点以下4桁までに丸める
+          schedule_stop_machine: dataScheduleStopMachine.find(e=> e.machine_status_history_id==row.id)||null  //match schedule for each machine
+        };
+      } else {
+        // ✅ Các máy không phải loại 40 thì không tính hiệu suất
+        // ✅ タイプ40以外の機械は稼働率を計算しない
+        return {
+          id: row.id,
+          machine_no: row.machine_no,
+          x: row.x,
+          y: row.y,
+          //status: row.status,
+          status: Math.round(Math.random()),        // デモ用に0か1を表示
+          ct: null,
+          machine_type: row.machine_type,
+          hour: null,
+          counter: null,
+          performance: null,
+        };
+      }
+    });
+  }
 
   async getMachinePerformanceSummaryDemo(factory: number){
     //this is demo data of machine
