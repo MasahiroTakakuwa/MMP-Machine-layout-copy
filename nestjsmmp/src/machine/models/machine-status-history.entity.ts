@@ -13,10 +13,9 @@
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-//@Entity({ name: 'machine_status_history' }) // ✅ Bảng gốc trên MySQL
+@Entity('machine_status_history')           // ✅ Bảng gốc trên MySQL
                                             // ✅ MySQL上の実テーブル名
 
-@Entity('machine_status_history')
 export class MachineStatusHistory {
   @PrimaryGeneratedColumn({ name: 'ID' })
   id: number;

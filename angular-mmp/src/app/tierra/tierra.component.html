@@ -148,7 +148,7 @@ src/app/tierra/tierra.component.html
                                 '\nShift: ' + machine.schedule_stop_machine?.shift + 
                                 '\nReason: ' + machine.schedule_stop_machine?.content"
               [tooltipDisabled]="!machine.schedule_stop_machine"
-              [tooltipStyleClass]="'custom-tooltip'" 
+              [tooltipStyleClass]="'custom-tooltip'"
               [attr.cx]="machine.x + 60"
               [attr.cy]="machine.y + 20"
               [attr.fill]="machine.schedule_stop_machine?'#ccc':getPerformanceColor(machine.performance)"
@@ -167,7 +167,7 @@ src/app/tierra/tierra.component.html
               text-anchor="middle"
               (click)="userPermissions.includes(11)&&inputDowntime(machine)"
             >
-              {{ (machine.performance ?? 0) * 100 | number:'1.1-1' }}%
+              {{ machine.schedule_stop_machine? 'Stop':((machine.performance ?? 0) * 100 | number:'1.1-1' )+'%'}}
             </text>
           </g>
 

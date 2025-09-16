@@ -88,8 +88,8 @@ export class MachineService {
 
         // ✅ Công thức: counter / (thời gian chạy thực tế / CT)
         // ✅ 式： 生産数 ÷（経過時間 / サイクルタイム）
-        // let performance = row.ct > 0 ? row.counter / (runningSec / row.ct) : 0;
-        // if (performance > 1) {performance = 1}  // ✅ Giới hạn hiệu suất tối đa là 1 (100%)
+        let performance = row.ct > 0 ? row.counter / (runningSec / row.ct) : 0;
+        if (performance > 1) {performance = 1}  // ✅ Giới hạn hiệu suất tối đa là 1 (100%)
         //                                         // ✅ 最大パフォーマンスを1（100%）に制限
 
         return {
@@ -97,14 +97,14 @@ export class MachineService {
           machine_no: row.machine_no,
           x: row.x,
           y: row.y,
-          //status: row.status,
-          status: Math.round(Math.random()),        // デモ用に0か1を表示
+          status: row.status,
+          // status: Math.round(Math.random()),        // デモ用に0か1を表示
           ct: row.ct,
           machine_type: row.machine_type,
           hour: now.getHours(),
           counter: row.counter,
-          performance: Math.random(),               // デモ用に0から1未満の数字をランダム表示
-          //performance: parseFloat(performance.toFixed(4)),
+          // performance: Math.random(),               // デモ用に0から1未満の数字をランダム表示
+          performance: parseFloat(performance.toFixed(4)),
           // ✅ Làm tròn performance đến 4 chữ số thập phân
           // ✅ パフォーマンスを小数点以下4桁までに丸める
           schedule_stop_machine: dataScheduleStopMachine.find(e=> e.machine_status_history_id==row.id)||null  //match schedule for each machine
@@ -117,8 +117,8 @@ export class MachineService {
           machine_no: row.machine_no,
           x: row.x,
           y: row.y,
-          //status: row.status,
-          status: Math.round(Math.random()),        // デモ用に0か1を表示
+          status: row.status,
+          // status: Math.round(Math.random()),        // デモ用に0か1を表示
           ct: null,
           machine_type: row.machine_type,
           hour: null,
