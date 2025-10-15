@@ -13,6 +13,8 @@ import { AuthGuard } from './app/guards/auth.guard';
 import { NonAuthGuard } from './app/guards/non-auth.guard';
 import { GeneralInformation } from './app/pages/account-management/generalInformation';
 import { AccountManagement } from './app/pages/account-management/accountManagement';
+import { Test } from './app/test/test.component';
+import { Test2 } from './app/test2/test2.component';
 
 export const appRoutes: Routes = [
     {
@@ -35,6 +37,8 @@ export const appRoutes: Routes = [
             // 🇯🇵 それぞれの工場ページに対応するルート定義です。
             { path: 'general-information', component: GeneralInformation },
             { path: 'account-management', component: AccountManagement },
+            { path: 'test', component: Test},
+            { path: 'test2', component: Test2},
 
         ]
     },
