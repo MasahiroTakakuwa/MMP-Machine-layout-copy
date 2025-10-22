@@ -167,6 +167,10 @@ export class Test2 implements OnInit, OnDestroy {
         console.error('Lỗi khi gọi API:', err);
       },
     });
+
+    // 稼働中・停止中の設備台数を取得
+    //this.machineService.
+
   }
 
   // ✅ Biến dùng cho việc cập nhật dữ liệu tự động | データを自動更新するための変数
