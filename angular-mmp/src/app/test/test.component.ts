@@ -3,16 +3,26 @@ import { ChartModule } from 'primeng/chart';
 import { FluidModule } from 'primeng/fluid';
 import { debounceTime, Subscription } from 'rxjs';
 import { LayoutService } from '../layout/service/layout.service';
+import { KpiService } from '../services/kpi.service';
 
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule } from '@angular/forms';
-import { DropdownModule } from 'primeng/dropdown';
+import { DropdownItem, DropdownModule } from 'primeng/dropdown';
 
 // interfaceはクラスの外側に記述する事
 export interface FactoryOption {
-        name: string;
-        code: number;
-    }
+    name: string;
+    code: number;
+}
+export interface Dropdownitem {
+    name: string;
+    code: string;
+}
+
+export interface Kpi {
+    factory_type: number;
+    parts_no: string;
+}
 
 @Component({
     selector: 'app-test',
@@ -33,21 +43,13 @@ export class Test implements OnInit, OnDestroy{
         { name: 'Tierra',code:4},
         { name: 'Luna',code:6},
         { name: 'Saturn',code:5}
-    ];
-    
-    selectButtonValue: FactoryOption = this.selectButtonValues[0];
+    ];    
+    selectButtonValue: FactoryOption = this.selectButtonValues[2];
     selectedNode: any = null;
 
     // dropdownlistの初期設定
-    dropdownValues = [
-        { name: 'New York', code: 'NY' },
-        { name: 'Rome', code: 'RM' },
-        { name: 'London', code: 'LDN' },
-        { name: 'Istanbul', code: 'IST' },
-        { name: 'Paris', code: 'PRS' }
-    ];
-
-    dropdownValue: any = null;
+    dropdownValues:  Dropdownitem[] = [];
+    dropdownValue: Dropdownitem | null = null;
 
     // Chartの初期設定
     lineData: any;
@@ -56,16 +58,22 @@ export class Test implements OnInit, OnDestroy{
     barOptions: any;
 
     subscription: Subscription;
-    constructor(private layoutService: LayoutService) {
+    constructor(
+        private layoutService: LayoutService,
+        private kpiService: KpiService
+        ) {
         this.subscription = this.layoutService.configUpdate$.pipe(debounceTime(25)).subscribe(() => {
             this.initCharts();
         });
     }
 
     ngOnInit() {
-        // this.initCharts();
-    }
+        this.loadDropdownItems(this.selectButtonValue.code);
 
+    }
+    onFactoryChange() {
+        this.loadDropdownItems(this.selectButtonValue.code)
+    }
     ngAfterViewInit() {
         this.initCharts();
     }
@@ -77,7 +85,7 @@ export class Test implements OnInit, OnDestroy{
         const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
         this.lineData = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
             datasets: [
                 {
                     label: 'First Dataset',
@@ -131,19 +139,19 @@ export class Test implements OnInit, OnDestroy{
         };
 
         this.barData = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
             datasets: [
                 {
-                    label: 'My First dataset',
+                    label: '実績',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
                     borderColor: documentStyle.getPropertyValue('--p-primary-500'),
                     data: [65, 59, 80, 81, 56, 55, 40]
                 },
                 {
-                    label: 'My Second dataset',
+                    label: '計画',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
                     borderColor: documentStyle.getPropertyValue('--p-primary-200'),
-                    data: [28, 48, 40, 19, 86, 27, 90]
+                    data: [60, 60, 60, 60, 60, 60, 60]
                 }
             ]
         };
@@ -183,6 +191,17 @@ export class Test implements OnInit, OnDestroy{
             }
         };
 
+    }
+
+    loadDropdownItems(factoryCode: number) {
+        this.kpiService.getPartsNo(factoryCode).subscribe((items: Kpi[]) =>
+        {
+            this.dropdownValues = items.map(item => ({
+                name: item.parts_no,
+                code: item.parts_no
+            }));
+            this.dropdownValue = null;
+        });
     }
 
     ngOnDestroy() {

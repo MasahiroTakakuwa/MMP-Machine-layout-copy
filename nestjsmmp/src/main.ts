@@ -4,6 +4,9 @@ import { ValidationPipe } from "@nestjs/common"
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+
+import { Logger } from '@nestjs/common';
+
 const express = require('express');
 
 async function bootstrap() {

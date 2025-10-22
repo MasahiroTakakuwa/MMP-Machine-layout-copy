@@ -4,7 +4,8 @@
             <div class="p-formgroup-inline flex flex-wrap gap-3 align-items-center">
                 <div class="flex align-items-center gap-2">
                     <div class="font-semibold text-xl">工場選択</div>
-                    <p-selectbutton [(ngModel)]="selectButtonValue" [options]="selectButtonValues" optionLabel="name" />
+                    <p-selectbutton [(ngModel)]="selectButtonValue" [options]="selectButtonValues" optionLabel="name"
+                    (onChange)="onFactoryChange()" />
                 </div>
                 
                 <div class="flex align-items-center gap-2">
@@ -12,7 +13,7 @@
                     <p-dropdown [(ngModel)]="dropdownValue" [options]="dropdownValues" optionLabel="name" placeholder="Select" />
                 </div>
             </div>
-            <div class="font-semibold text-xl mb-4">Bar</div>
+            <div class="font-semibold text-xl mb-4">生産実績</div>
             <p-chart type="bar" [data]="barData" [options]="barOptions" style="height: 400px;"></p-chart>
         </div>
     </div>

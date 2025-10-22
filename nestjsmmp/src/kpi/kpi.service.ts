@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { EntityManager, In, Repository } from "typeorm";
 import { Devices } from "./models/devices.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { query } from "express";
 
 @Injectable()
 export class KpiService {
@@ -19,10 +18,10 @@ async getPartsNoSummary(factory: number) {
     .createQueryBuilder('m')
     .select(['m.parts_no AS parts_no'])
     .groupBy('m.parts_no')
-  if(factory !== 0) {
-    query.where('m_factory_type = :factory', {factory});
+  if(Number(factory) !== 0) {
+    query.where('m.factory_type = :factory', {factory});
   }
-    
+  
   const result = await query.getRawMany();
   return result;
 }
