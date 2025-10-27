@@ -12,16 +12,28 @@
                     <div class="font-semibold text-xl">品番</div>
                     <p-dropdown [(ngModel)]="dropdownValue" [options]="dropdownValues" optionLabel="name" placeholder="Select" />
                 </div>
+
+                <div class="flex align-items-center gap-2">
+                    <div class="font-semibold text-xl">設備</div>
+                    <p-dropdown [(ngModel)]="dropdownValue" [options]="dropdownValues" optionLabel="name" placeholder="Select" />
+                </div>
+
+                <div class="flex align-items-center gap-2">
+                    <div class="font-semibold text-xl">表示期間</div>
+                    <p-selectbutton [(ngModel)]="selectButton2Value" [options]="selectButton2Values" optionLabel="name"
+                    (onChange)="onDateChange()" />
+                </div>
+
             </div>
             <div class="font-semibold text-xl mb-4">生産実績</div>
-            <p-chart type="bar" [data]="barData" [options]="barOptions" style="height: 400px;"></p-chart>
+            <p-chart type="bar" [data]="barData" [options]="barOptions" style="height: 600px;"></p-chart>
         </div>
     </div>
 
-    <div class="col-span-12 xl:col-span-6">
+    <div class="col-span-12 xl:col-span-12">
         <div class="card">        
-            <div class="font-semibold text-xl mb-4">Linear</div>
-            <p-chart type="line" [data]="lineData" [options]="lineOptions" style="height: 400px;"></p-chart>
+            <div class="font-semibold text-xl mb-4">不良率</div>
+            <p-chart type="bar" [data]="stackedbarData" [options]="stackedbarOptions" style="height: 400px;"></p-chart>
         </div>
     </div>
 </p-fluid>

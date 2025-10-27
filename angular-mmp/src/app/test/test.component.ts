@@ -14,15 +14,19 @@ export interface FactoryOption {
     name: string;
     code: number;
 }
+export interface DateOption {
+    name: string;
+    code: number;
+}
 export interface Dropdownitem {
     name: string;
     code: string;
 }
-
 export interface Kpi {
     factory_type: number;
     parts_no: string;
 }
+
 
 @Component({
     selector: 'app-test',
@@ -35,7 +39,13 @@ export interface Kpi {
 
 export class Test implements OnInit, OnDestroy{
 
+    labels_day: string[] = ['1','2','3','4','5','6','7','8','9','10',
+                                          '11','12','13','14','15','16','17','18','19','20',
+                                          '21','22','23','24','25','26','27','28','29','30','31'    
+                                        ];
+    labels_month: string[] = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
     // selectButtonの初期設定
+    // 工場選択
     selectButtonValues: FactoryOption[] = [
         { name: '全工場',code:0},
         { name: 'Jupiter',code:1},
@@ -45,17 +55,28 @@ export class Test implements OnInit, OnDestroy{
         { name: 'Saturn',code:5}
     ];    
     selectButtonValue: FactoryOption = this.selectButtonValues[2];
+    
+    // 期間選択
+    selectButton2Values: DateOption[] = [
+        {name: '日別',code:0},
+        {name: '月別',code:1}
+    ];
+    selectButton2Value: DateOption = this.selectButton2Values[0];
+
     selectedNode: any = null;
+
 
     // dropdownlistの初期設定
     dropdownValues:  Dropdownitem[] = [];
     dropdownValue: Dropdownitem | null = null;
 
     // Chartの初期設定
-    lineData: any;
-    lineOptions: any;
+    // lineData: any;
+    // lineOptions: any;
     barData: any;
     barOptions: any;
+    stackedbarData: any;
+    stackedbarOptions: any;
 
     subscription: Subscription;
     constructor(
@@ -74,6 +95,26 @@ export class Test implements OnInit, OnDestroy{
     onFactoryChange() {
         this.loadDropdownItems(this.selectButtonValue.code)
     }
+
+    onDateChange() {
+        if (!this.selectButton2Value || this.selectButton2Value.code === undefined) {
+                return;
+            }
+
+        if(this.selectButton2Value.code === 0){
+            this.barData.labels = this.labels_day
+            this.stackedbarData.labels = this.labels_day
+        }
+        else if(this.selectButton2Value.code === 1){
+            this.barData.labels = this.labels_month
+            this.stackedbarData.labels = this.labels_month
+        }
+
+        this.barData = { ...this.barData };
+        this.stackedbarData = { ...this.stackedbarData };
+
+    }
+
     ngAfterViewInit() {
         this.initCharts();
     }
@@ -84,71 +125,71 @@ export class Test implements OnInit, OnDestroy{
         const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
         const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
-        this.lineData = {
-            labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
-            datasets: [
-                {
-                    label: 'First Dataset',
-                    data: [65, 59, 80, 81, 56, 55, 40],
-                    fill: false,
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
-                    borderColor: documentStyle.getPropertyValue('--p-primary-500'),
-                    tension: 0.4
-                },
-                {
-                    label: 'Second Dataset',
-                    data: [28, 48, 40, 19, 86, 27, 90],
-                    fill: false,
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-                    borderColor: documentStyle.getPropertyValue('--p-primary-200'),
-                    tension: 0.4
-                }
-            ]
-        };
+        // this.lineData = {
+        //     labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
+        //     datasets: [
+        //         {
+        //             label: 'First Dataset',
+        //             data: [65, 59, 80, 81, 56, 55, 40],
+        //             fill: false,
+        //             backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
+        //             borderColor: documentStyle.getPropertyValue('--p-primary-500'),
+        //             tension: 0.4
+        //         },
+        //         {
+        //             label: 'Second Dataset',
+        //             data: [28, 48, 40, 19, 86, 27, 90],
+        //             fill: false,
+        //             backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
+        //             borderColor: documentStyle.getPropertyValue('--p-primary-200'),
+        //             tension: 0.4
+        //         }
+        //     ]
+        // };
 
-        this.lineOptions = {
-            maintainAspectRatio: false,     
-            aspectRatio: 1.0,               // グラフの縦横比を調整(0に近い程、縦長になる)
-            plugins: {
-                legend: {
-                    labels: {
-                        color: textColor
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: textColorSecondary
-                    },
-                    grid: {
-                        color: surfaceBorder,
-                        drawBorder: false
-                    }
-                },
-                y: {
-                    ticks: {
-                        color: textColorSecondary
-                    },
-                    grid: {
-                        color: surfaceBorder,
-                        drawBorder: false
-                    }
-                }
-            }
-        };
+        // this.lineOptions = {
+        //     maintainAspectRatio: false,     
+        //     aspectRatio: 1.0,               // グラフの縦横比を調整(0に近い程、縦長になる)
+        //     plugins: {
+        //         legend: {
+        //             labels: {
+        //                 color: textColor
+        //             }
+        //         }
+        //     },
+        //     scales: {
+        //         x: {
+        //             ticks: {
+        //                 color: textColorSecondary
+        //             },
+        //             grid: {
+        //                 color: surfaceBorder,
+        //                 drawBorder: false
+        //             }
+        //         },
+        //         y: {
+        //             ticks: {
+        //                 color: textColorSecondary
+        //             },
+        //             grid: {
+        //                 color: surfaceBorder,
+        //                 drawBorder: false
+        //             }
+        //         }
+        //     }
+        // };
 
         this.barData = {
-            labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
+            labels: this.labels_day,
             datasets: [
                 {
-                    label: '実績',
+                    label: '計画',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
                     borderColor: documentStyle.getPropertyValue('--p-primary-500'),
                     data: [65, 59, 80, 81, 56, 55, 40]
                 },
                 {
-                    label: '計画',
+                    label: '実績',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
                     borderColor: documentStyle.getPropertyValue('--p-primary-200'),
                     data: [60, 60, 60, 60, 60, 60, 60]
@@ -159,6 +200,7 @@ export class Test implements OnInit, OnDestroy{
         this.barOptions = {
             maintainAspectRatio: false,
             aspectRatio: 1.0,
+            responsive: true,
             plugins: {
                 legend: {
                     labels: {
@@ -189,6 +231,43 @@ export class Test implements OnInit, OnDestroy{
                     }
                 }
             }
+        };
+
+        this.stackedbarData = {
+            labels: this.labels_day,
+            datasets: [
+                {
+                label: '段取り',
+                backgroundColor: '#42A5F5',
+                data: [0.65, 0.59, 0.80]
+                },
+                {
+                label: '検査機NG',
+                backgroundColor: '#66BB6A',
+                data: [0.28, 0.48, 0.40]
+                },
+                {
+                label: '外観NG',
+                backgroundColor: '#de2f2fff',
+                data: [0.08, 0.18, 0.04]
+                },
+            ]
+
+        };
+
+        this.stackedbarOptions = {
+            maintainAspectRatio: false,
+            aspectRatio: 1.0,
+            responsive: true,
+            scales: {
+                x: {
+                stacked: true
+                },
+                y: {
+                stacked: true
+                }
+            }
+
         };
 
     }
