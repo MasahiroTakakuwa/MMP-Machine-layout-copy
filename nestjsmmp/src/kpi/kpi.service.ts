@@ -10,6 +10,7 @@ export class KpiService {
     private entityManager: EntityManager,
     @InjectRepository(Devices)
     private readonly deviceRepo: Repository<Devices>,
+    @InjectRepository(ProductHistory)
     private readonly productRepo: Repository<ProductHistory>
   ){}
 

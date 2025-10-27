@@ -60,13 +60,12 @@ export class Test implements OnInit, OnDestroy{
     ];    
     selectButtonValue: FactoryOption = this.selectButtonValues[2];
     
-    // 期間選択
+    // 検索期間選択
     selectButton2Values: DateOption[] = [
         {name: '日別',code:0},
         {name: '月別',code:1}
     ];
     selectButton2Value: DateOption = this.selectButton2Values[0];
-
     selectedNode: any = null;
 
     // dropdownlistの初期設定
@@ -92,43 +91,46 @@ export class Test implements OnInit, OnDestroy{
             this.initCharts();
         });
     }
-
+    // 初期設定
     ngOnInit() {
         this.loadDropdownItems(this.selectButtonValue.code);
-
     }
+    // 工場区分変更後
     onFactoryChange() {
         this.loadDropdownItems(this.selectButtonValue.code)
     }
+    // 品番選択後
     onPartsNoSelect() {        
     if (this.dropdownValue && this.dropdownValue.code !== undefined) {
         this.loadDropdownItems2(this.selectButtonValue.code, this.dropdownValue.code);
         }
 
     }
+    // 日別・月別選択後
     onDateChange() {
         if (!this.selectButton2Value || this.selectButton2Value.code === undefined) {
                 return;
             }
-
+        // 日別を選択
         if(this.selectButton2Value.code === 0){
             this.barData.labels = this.labels_day
             this.stackedbarData.labels = this.labels_day
         }
+        // 月別を選択
         else if(this.selectButton2Value.code === 1){
             this.barData.labels = this.labels_month
             this.stackedbarData.labels = this.labels_month
         }
-
+        // Chartのデータを更新
         this.barData = { ...this.barData };
         this.stackedbarData = { ...this.stackedbarData };
 
     }
-
+    // ビュー初期設定後処理
     ngAfterViewInit() {
         this.initCharts();
     }
-
+    // チャート初期設定
     initCharts() {
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
@@ -282,6 +284,7 @@ export class Test implements OnInit, OnDestroy{
 
     }
 
+    // 品番ドロップダウンリスト更新
     loadDropdownItems(factoryCode: number) {
         this.kpiService.getPartsNo(factoryCode).subscribe((items: Kpi[]) =>
         {
@@ -292,7 +295,7 @@ export class Test implements OnInit, OnDestroy{
             this.dropdownValue = null;
         });
     }
-
+    // ラインNoドロップダウンリスト更新
     loadDropdownItems2(factoryCode: number,partsCode: string){
         this.kpiService.getLineNo(factoryCode,partsCode).subscribe((items:any[]) =>
         {
@@ -303,7 +306,7 @@ export class Test implements OnInit, OnDestroy{
             this.dropdown2Value = null;
         });
     }
-
+    // ブラウザ終了時
     ngOnDestroy() {
         if (this.subscription) {
             this.subscription.unsubscribe();
