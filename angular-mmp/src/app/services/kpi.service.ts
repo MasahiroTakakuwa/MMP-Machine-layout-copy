@@ -23,4 +23,12 @@ export class KpiService {
         map((res) => res as Kpi[])
     );
   }
+
+  getLineNo(factory: number =0,parts_no: string =''): Observable<any>{
+    const url = `${this.apiURL}/kpi/lineno?factory=${factory}&parts_no=${parts_no}`;
+    return this.http.get<any>(url).pipe(
+        map((res) => res as any)
+    
+    );
+  }
 }

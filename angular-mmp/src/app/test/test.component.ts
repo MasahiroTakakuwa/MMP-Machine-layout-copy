@@ -22,6 +22,10 @@ export interface Dropdownitem {
     name: string;
     code: string;
 }
+export interface Dropdownitem2 {
+    name: string;
+    code: string;
+}
 export interface Kpi {
     factory_type: number;
     parts_no: string;
@@ -65,10 +69,11 @@ export class Test implements OnInit, OnDestroy{
 
     selectedNode: any = null;
 
-
     // dropdownlistの初期設定
     dropdownValues:  Dropdownitem[] = [];
     dropdownValue: Dropdownitem | null = null;
+    dropdown2Values: Dropdownitem2[] = [];
+    dropdown2Value: Dropdownitem2 | null = null;
 
     // Chartの初期設定
     // lineData: any;
@@ -95,7 +100,12 @@ export class Test implements OnInit, OnDestroy{
     onFactoryChange() {
         this.loadDropdownItems(this.selectButtonValue.code)
     }
+    onPartsNoSelect() {        
+    if (this.dropdownValue && this.dropdownValue.code !== undefined) {
+        this.loadDropdownItems2(this.selectButtonValue.code, this.dropdownValue.code);
+        }
 
+    }
     onDateChange() {
         if (!this.selectButton2Value || this.selectButton2Value.code === undefined) {
                 return;
@@ -280,6 +290,17 @@ export class Test implements OnInit, OnDestroy{
                 code: item.parts_no
             }));
             this.dropdownValue = null;
+        });
+    }
+
+    loadDropdownItems2(factoryCode: number,partsCode: string){
+        this.kpiService.getLineNo(factoryCode,partsCode).subscribe((items:any[]) =>
+        {
+            this.dropdown2Values = items.map(item => ({
+                name: item.line_no,
+                code: item.line_no
+            }));
+            this.dropdown2Value = null;
         });
     }
 

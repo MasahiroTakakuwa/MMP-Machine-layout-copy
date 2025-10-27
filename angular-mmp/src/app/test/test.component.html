@@ -10,12 +10,14 @@
                 
                 <div class="flex align-items-center gap-2">
                     <div class="font-semibold text-xl">品番</div>
-                    <p-dropdown [(ngModel)]="dropdownValue" [options]="dropdownValues" optionLabel="name" placeholder="Select" />
+                    <p-dropdown [(ngModel)]="dropdownValue" [options]="dropdownValues" optionLabel="name" placeholder="Select"
+                    (onChange)="onPartsNoSelect()" />
+                    
                 </div>
 
                 <div class="flex align-items-center gap-2">
                     <div class="font-semibold text-xl">設備</div>
-                    <p-dropdown [(ngModel)]="dropdownValue" [options]="dropdownValues" optionLabel="name" placeholder="Select" />
+                    <p-dropdown [(ngModel)]="dropdown2Value" [options]="dropdown2Values" optionLabel="name" placeholder="Select" />
                 </div>
 
                 <div class="flex align-items-center gap-2">

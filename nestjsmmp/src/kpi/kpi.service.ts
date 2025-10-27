@@ -30,10 +30,13 @@ async getPartsNoSummary(factory: number) {
 async getLineNoSummary(factory: number,parts_no: string){
     const query = await this.deviceRepo
     .createQueryBuilder('m')
-    .select('m.line_no')
+    .select(['m.line_no AS line_no',
+             'm.machine_no AS machine_no'
+    ])
     .where('m.factory_type = :factory', {factory})
-    .andWhere('m.parts_no = parts_no',{parts_no})
-
+    .andWhere('m.parts_no = :parts_no',{parts_no})
+    .andWhere('m.device_type = 40 ')
+    .orderBy('m.line_no ')
     const result = await query.getRawMany();
     return result;
   }
