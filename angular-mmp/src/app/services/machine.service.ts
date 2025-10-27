@@ -49,7 +49,7 @@ export class MachineService {
   getStatusCount(factory: number = 0) {
     return this.http.get<{ runningCount: number; stoppingCount: number }>(
       `${this.apiURL}/machine/count?factory=${factory}`
-      );    
+      );
   }
 
   saveStatusMachine(data: StatusStopMachine): Observable<any>{

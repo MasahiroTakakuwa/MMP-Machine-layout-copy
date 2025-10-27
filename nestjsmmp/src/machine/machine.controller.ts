@@ -33,6 +33,7 @@ export class MachineController {
 
   }
 
+  // 稼働中・停止中の設備台数をカウント
   @Get('count')
   async getMachineCount(@Query('factory') factory: number) {
     const runningCount = await this.machineService.getRunningMachineCount(factory);

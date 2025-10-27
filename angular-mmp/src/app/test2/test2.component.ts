@@ -29,15 +29,18 @@ import { StyleClass } from 'primeng/styleclass';
 })
 export class Test2 implements OnInit, OnDestroy {
 
+    // カウント格納先の初期宣言
+    runningCount: number = 0;
+    stoppingCount: number = 0;
     // p-tableの初期設定
     columns = [{ field: 'name', header: '台数表示', StyleClass:'center-text' }];
     items = [
     { name: '稼働中' },
-    { name: '123' },
+    { name: this.runningCount },
     { name: '停止中' },
-    { name: '123' },
-    { name: '計画停止中' },
-    { name: '123' }
+    { name: this.stoppingCount }
+    // { name: '計画停止中' },
+    // { name: 'C' }
     ];
     subscription: Subscription;
     constructor(
@@ -78,7 +81,7 @@ export class Test2 implements OnInit, OnDestroy {
       });
     // 📥 🇻🇳 Gọi API khi component khởi tạo | 🇯🇵 コンポーネント初期化時にAPIを呼び出す
     this.fetchMachines();
-
+      
     // 🧱 🇻🇳 Tạo mảng tọa độ để hiển thị lưới layout (cách 100px) | 🇯🇵 レイアウトのグリッド座標（100px間隔）を生成
     this.gridX = Array.from({ length: this.svgWidth / 50 }, (_, i) => i * 100);
     this.gridY = Array.from({ length: this.svgHeight / 50 }, (_, i) => i * 100);
@@ -169,7 +172,16 @@ export class Test2 implements OnInit, OnDestroy {
     });
 
     // 稼働中・停止中の設備台数を取得
-    //this.machineService.
+    this.machineService.getStatusCount(2).subscribe(data => {
+      this.runningCount = data.runningCount;
+      this.stoppingCount = data.stoppingCount;
+      
+      
+
+    })
+
+    this.items[1].name = this.runningCount;
+    this.items[3].name = this.stoppingCount;
 
   }
 
