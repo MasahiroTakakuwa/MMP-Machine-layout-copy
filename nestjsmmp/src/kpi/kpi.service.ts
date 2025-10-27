@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EntityManager, In, Repository } from "typeorm";
 import { Devices } from "./models/devices.entity";
+import { ProductHistory } from "./models/product-history.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
@@ -8,7 +9,8 @@ export class KpiService {
   constructor(
     private entityManager: EntityManager,
     @InjectRepository(Devices)
-    private readonly deviceRepo: Repository<Devices>
+    private readonly deviceRepo: Repository<Devices>,
+    private readonly productRepo: Repository<ProductHistory>
   ){}
 
 // 指定された工場の品番一覧を取得する
@@ -37,6 +39,22 @@ async getLineNoSummary(factory: number,parts_no: string){
     .andWhere('m.parts_no = :parts_no',{parts_no})
     .andWhere('m.device_type = 40 ')
     .orderBy('m.line_no ')
+    const result = await query.getRawMany();
+    return result;
+  }
+
+// 指定の工場・品番の過去出来高を取得
+async getproductSummary(factory: number,parts_no: string){
+    const query = await this.productRepo
+    .createQueryBuilder('m')
+    .select(['m.production AS production',
+             'm.prod_date AS prod_date'
+    ])
+    .where('m.factory_type = :factory', {factory})
+    .andWhere('m.parts_no = :parts_no',{parts_no})
+    .andWhere('m.prod_date >= DATE_ADD(CURDATE(), INTERVAL 30 DAY)')
+    .andWhere('m.prod_date <= CURDATE()')
+    .orderBy('m.prod_date ')
     const result = await query.getRawMany();
     return result;
   }
