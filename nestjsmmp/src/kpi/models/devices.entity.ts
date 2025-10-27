@@ -15,4 +15,7 @@ export class Devices {
   @Column({ name: 'parts_no'})
   parts_no: string;
   
+  @Column({ name: 'line_no'})
+  line_no: string;
+  
 }

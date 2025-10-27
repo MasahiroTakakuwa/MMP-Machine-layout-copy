@@ -13,16 +13,29 @@ export class KpiService {
 
 // 指定された工場の品番一覧を取得する
 async getPartsNoSummary(factory: number) {
-  //  工場ごとの品番を取得する　※factory=0の場合は全工場として処理する
-  const query = await this.deviceRepo
-    .createQueryBuilder('m')
-    .select(['m.parts_no AS parts_no'])
-    .groupBy('m.parts_no')
-  if(Number(factory) !== 0) {
-    query.where('m.factory_type = :factory', {factory});
+    //  工場ごとの品番を取得する　※factory=0の場合は全工場として処理する(Jupiter除く?)
+    const query = await this.deviceRepo
+      .createQueryBuilder('m')
+      .select('m.parts_no AS parts_no')
+      .groupBy('m.parts_no')
+    if(Number(factory) !== 0) {
+      query.where('m.factory_type = :factory', {factory});
+    }
+    
+    const result = await query.getRawMany();
+    return result;
   }
-  
-  const result = await query.getRawMany();
-  return result;
-}
+
+// 指定された工場・品番のラインNoを取得
+async getLineNoSummary(factory: number,parts_no: string){
+    const query = await this.deviceRepo
+    .createQueryBuilder('m')
+    .select('m.line_no')
+    .where('m.factory_type = :factory', {factory})
+    .andWhere('m.parts_no = parts_no',{parts_no})
+
+    const result = await query.getRawMany();
+    return result;
+  }
+
 }

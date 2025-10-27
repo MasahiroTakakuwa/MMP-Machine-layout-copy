@@ -10,4 +10,12 @@ export class KpiController {
       return this.KpiService.getPartsNoSummary(factory);
 
     }
+
+    @Get('lineno')
+    getLineNo(@Query('factory') factory: number,
+              @Query('parts_no') parts_no: string
+    ){
+      return this.KpiService.getLineNoSummary(factory,parts_no)
+    }
+
 }
