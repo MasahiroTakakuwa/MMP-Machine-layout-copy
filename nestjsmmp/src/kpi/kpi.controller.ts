@@ -22,9 +22,10 @@ export class KpiController {
     // 過去の出来高を工場・品番ごとに取得
     @Get('product')
     getProductHistory(@Query('factory') factory: number,
-                      @Query('parts_no') parts_no: string
+                      @Query('parts_no') parts_no: string,
+                      @Query('date') date: string
     ){
-      return this.KpiService.getproductSummary(factory,parts_no)
+      return this.KpiService.getproductSummary(factory,parts_no,date)
     }
 
 }

@@ -31,8 +31,8 @@ export class KpiService {
     );
   }
 
-  getProductHistory(factory: number =0,parts_no: string=''): Observable<any>{
-    const url = `${this.apiURL}/kpi/product?factory=${factory}&parts_no=${parts_no}`;
+  getProductHistory(factory: number =0,parts_no: string='',date: string=''): Observable<any>{
+    const url = `${this.apiURL}/kpi/product?factory=${factory}&parts_no=${parts_no}&date=${date}`;
     return this.http.get<any>(url).pipe(
         map((res) => res as any)    
     );

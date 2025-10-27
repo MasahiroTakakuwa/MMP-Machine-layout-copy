@@ -284,7 +284,7 @@ export class Test implements OnInit, OnDestroy{
 
     }
 
-    // 品番ドロップダウンリスト更新
+    // 品番ドロップダウンリスト更新(工場選択後)
     loadDropdownItems(factoryCode: number) {
         this.kpiService.getPartsNo(factoryCode).subscribe((items: Kpi[]) =>
         {
@@ -295,8 +295,12 @@ export class Test implements OnInit, OnDestroy{
             this.dropdownValue = null;
         });
     }
-    // ラインNoドロップダウンリスト更新
+    // ラインNoドロップダウンリスト更新(品番選択後)
     loadDropdownItems2(factoryCode: number,partsCode: string){
+        const today = new Date();
+        const firstDayofMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const formatted = firstDayofMonth.toISOString().split('T')[0]
+        // 設備ドロップダウンリスト更新
         this.kpiService.getLineNo(factoryCode,partsCode).subscribe((items:any[]) =>
         {
             this.dropdown2Values = items.map(item => ({
@@ -305,6 +309,24 @@ export class Test implements OnInit, OnDestroy{
             }));
             this.dropdown2Value = null;
         });
+        // 生産実績グラフ更新(日付で合算)
+        
+        this.kpiService.getProductHistory(factoryCode, partsCode, formatted)
+        .subscribe((items: any[]) => {
+            // 配列を初期化(31日分で0埋めした状態で宣言)
+            const totalsByDay: number[] = new Array(31).fill(0);
+            items.forEach(item => {              
+                const day = parseInt(item.prod_date.split('-')[2], 10); // 日付部分をintに変換
+                totalsByDay[day-1] = item.total_production; // dayをインデックスにして格納
+            });
+            // データセットに値を代入。
+            this.barData.datasets[0].data = totalsByDay;
+            this.barData.datasets[1].data = totalsByDay;
+            // グラフエリアを更新
+            this.barData = { ...this.barData };
+            
+        });
+
     }
     // ブラウザ終了時
     ngOnDestroy() {

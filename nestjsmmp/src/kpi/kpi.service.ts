@@ -45,16 +45,16 @@ async getLineNoSummary(factory: number,parts_no: string){
   }
 
 // 指定の工場・品番の過去出来高を取得
-async getproductSummary(factory: number,parts_no: string){
+async getproductSummary(factory: number,parts_no: string,date: string){
     const query = await this.productRepo
     .createQueryBuilder('m')
-    .select(['m.production AS production',
+    .select(['SUM(m.production) AS total_production',
              'm.prod_date AS prod_date'
     ])
     .where('m.factory_type = :factory', {factory})
     .andWhere('m.parts_no = :parts_no',{parts_no})
-    .andWhere('m.prod_date >= DATE_ADD(CURDATE(), INTERVAL 30 DAY)')
-    .andWhere('m.prod_date <= CURDATE()')
+    .andWhere('m.prod_date >= :date',{date})
+    .groupBy('m.prod_date')
     .orderBy('m.prod_date ')
     const result = await query.getRawMany();
     return result;
