@@ -37,8 +37,8 @@ async getLineNoSummary(factory: number,parts_no: string){
              'm.machine_no AS machine_no'
     ])
     .where('m.factory_type = :factory', {factory})
-    .andWhere('m.parts_no = :parts_no',{parts_no})
     .andWhere('m.device_type = 40 ')
+    .andWhere('m.parts_no = :parts_no',{parts_no})
     .orderBy('m.line_no ')
     const result = await query.getRawMany();
     return result;
@@ -52,11 +52,15 @@ async getproductSummary(factory: number,parts_no: string,date: string){
              'm.prod_date AS prod_date'
     ])
     .where('m.factory_type = :factory', {factory})
-    .andWhere('m.parts_no = :parts_no',{parts_no})
     .andWhere('m.prod_date >= :date',{date})
     .groupBy('m.prod_date')
     .orderBy('m.prod_date ')
+    if(parts_no !=='all'){
+      query.andWhere('m.parts_no = :parts_no',{parts_no})
+    }
     const result = await query.getRawMany();
+    console.log('SQL:',query.getSql());
+    console.log('result:',result);
     return result;
   }
 
