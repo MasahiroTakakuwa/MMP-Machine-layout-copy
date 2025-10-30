@@ -98,12 +98,10 @@ export class MachineService {
           x: row.x,
           y: row.y,
           status: row.status,
-          // status: Math.round(Math.random()),        // デモ用に0か1を表示
           ct: row.ct,
           machine_type: row.machine_type,
           hour: now.getHours(),
           counter: row.counter,
-          // performance: Math.random(),               // デモ用に0から1未満の数字をランダム表示
           performance: parseFloat(performance.toFixed(4)),
           // ✅ Làm tròn performance đến 4 chữ số thập phân
           // ✅ パフォーマンスを小数点以下4桁までに丸める
@@ -118,7 +116,6 @@ export class MachineService {
           x: row.x,
           y: row.y,
           status: row.status,
-          // status: Math.round(Math.random()),        // デモ用に0か1を表示
           ct: null,
           machine_type: row.machine_type,
           hour: null,
@@ -154,4 +151,15 @@ export class MachineService {
     return Number(result.count)
   }
 
+  // 指定された工場のライン数をカウント
+  async getLineCount(factory: number){
+    const result = await this.machineRepo
+      .createQueryBuilder('m')
+      .select('COUNT(*)','count')
+      .where('m.factory_type = :factory',{factory})
+      .andWhere('m.machine_type = 40')
+      .getRawOne();
+
+    return Number(result.count)
+  }
 }

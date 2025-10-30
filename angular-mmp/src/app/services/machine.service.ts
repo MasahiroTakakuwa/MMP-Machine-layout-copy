@@ -47,7 +47,7 @@ export class MachineService {
   }
 
   getStatusCount(factory: number = 0) {
-    return this.http.get<{ runningCount: number; stoppingCount: number }>(
+    return this.http.get<{ runningCount: number; stoppingCount: number; lineCount: number }>(
       `${this.apiURL}/machine/count?factory=${factory}`
       );
   }
