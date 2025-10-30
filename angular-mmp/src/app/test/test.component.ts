@@ -47,25 +47,17 @@ export class Test implements OnInit, OnDestroy{
                                           '11','12','13','14','15','16','17','18','19','20',
                                           '21','22','23','24','25','26','27','28','29','30','31'    
                                         ];
-    labels_month: string[] = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+
     // selectButtonの初期設定
     // 工場選択
     selectButtonValues: FactoryOption[] = [
-        { name: '全工場',code:0},
         { name: 'Jupiter',code:1},
         { name: 'Mercury',code:2},
         { name: 'Tierra',code:4},
         { name: 'Luna',code:6},
         { name: 'Saturn',code:5}
     ];    
-    selectButtonValue: FactoryOption = this.selectButtonValues[2];
-    
-    // 検索期間選択
-    // selectButton2Values: DateOption[] = [
-    //     {name: '日別',code:0},
-    //     {name: '月別',code:1}
-    // ];
-    // selectButton2Value: DateOption = this.selectButton2Values[0];
+    selectButtonValue: FactoryOption = this.selectButtonValues[1];
     selectedNode: any = null;
 
     // dropdownlistの初期設定
@@ -75,12 +67,10 @@ export class Test implements OnInit, OnDestroy{
     dropdown2Value: Dropdownitem2 | null = null;
 
     // Chartの初期設定
-    // lineData: any;
-    // lineOptions: any;
-    barData: any;
-    barOptions: any;
-    stackedbarData: any;
-    stackedbarOptions: any;
+    ProdChartData: any;
+    ProdChartOptions: any;
+    DefectRateData: any;
+    DefectRateOptions: any;
 
     subscription: Subscription;
     constructor(
@@ -106,29 +96,11 @@ export class Test implements OnInit, OnDestroy{
         }
 
     }
-    // 日別・月別選択後
-    // onDateChange() {
-    //     if (!this.selectButton2Value || this.selectButton2Value.code === undefined) {
-    //             return;
-    //         }
-    //     // 日別を選択
-    //     if(this.selectButton2Value.code === 0){
-    //         this.barData.labels = this.labels_day
-    //         this.stackedbarData.labels = this.labels_day
-    //     }
-    //     // 月別を選択
-    //     else if(this.selectButton2Value.code === 1){
-    //         this.barData.labels = this.labels_month
-    //         this.stackedbarData.labels = this.labels_month
-    //     }
-    //     // Chartのデータを更新
-    //     this.barData = { ...this.barData };
-    //     this.stackedbarData = { ...this.stackedbarData };
-
-    // }
+    
     // ビュー初期設定後処理
     ngAfterViewInit() {
         this.initCharts();
+
     }
     // チャート初期設定
     initCharts() {
@@ -137,99 +109,46 @@ export class Test implements OnInit, OnDestroy{
         const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
         const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
-        // this.lineData = {
-        //     labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
-        //     datasets: [
-        //         {
-        //             label: 'First Dataset',
-        //             data: [65, 59, 80, 81, 56, 55, 40],
-        //             fill: false,
-        //             backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
-        //             borderColor: documentStyle.getPropertyValue('--p-primary-500'),
-        //             tension: 0.4
-        //         },
-        //         {
-        //             label: 'Second Dataset',
-        //             data: [28, 48, 40, 19, 86, 27, 90],
-        //             fill: false,
-        //             backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-        //             borderColor: documentStyle.getPropertyValue('--p-primary-200'),
-        //             tension: 0.4
-        //         }
-        //     ]
-        // };
-
-        // this.lineOptions = {
-        //     maintainAspectRatio: false,     
-        //     aspectRatio: 1.0,               // グラフの縦横比を調整(0に近い程、縦長になる)
-        //     plugins: {
-        //         legend: {
-        //             labels: {
-        //                 color: textColor
-        //             }
-        //         }
-        //     },
-        //     scales: {
-        //         x: {
-        //             ticks: {
-        //                 color: textColorSecondary
-        //             },
-        //             grid: {
-        //                 color: surfaceBorder,
-        //                 drawBorder: false
-        //             }
-        //         },
-        //         y: {
-        //             ticks: {
-        //                 color: textColorSecondary
-        //             },
-        //             grid: {
-        //                 color: surfaceBorder,
-        //                 drawBorder: false
-        //             }
-        //         }
-        //     }
-        // };
-
-        this.barData = {
+        // 生産実績
+        this.ProdChartData = {
             labels: this.labels_day,
             datasets: [
                 {
                     type: 'bar',
                     label: '計画',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
-                    borderColor: documentStyle.getPropertyValue('--p-primary-500'),
+                    backgroundColor: '#42A5F5',
+                    borderColor: '#42A5F5',
                     data: [65, 59, 80, 81, 56, 55, 40],
                     yAxisID: 'y-axis-1'
                 },
                 {
                     type: 'bar',
                     label: '実績',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-                    borderColor: documentStyle.getPropertyValue('--p-primary-200'),
+                    backgroundColor: '#66BB6A',
+                    borderColor: '#66BB6A',
                     data: [60, 60, 60, 60, 60, 60, 60],
                     yAxisID: 'y-axis-1'
                 },
                 {
                     type: 'line',
                     label: '計画累積',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-400'),
-                    borderColor: documentStyle.getPropertyValue('--p-primary-400'),
+                    backgroundColor: '#42A5F5',
+                    borderColor: '#42A5F5',
                     data: [60, 60, 60, 60, 60, 60, 60],
                     yAxisID: 'y-axis-2'
                 },
                 {
                     type: 'line',
                     label: '実績累積',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-400'),
-                    borderColor: documentStyle.getPropertyValue('--p-primary-400'),
+                    backgroundColor: '#66BB6A',
+                    borderColor: '#66BB6A',
                     data: [60, 60, 60, 60, 60, 60, 60],
                     yAxisID: 'y-axis-2'
                 }
             ]
         };
 
-        this.barOptions = {
+        this.ProdChartOptions = {
             maintainAspectRatio: false,
             aspectRatio: 1.0,
             responsive: true,
@@ -276,7 +195,7 @@ export class Test implements OnInit, OnDestroy{
                     grid: {
                         color: surfaceBorder,
                         drawBorder: false,
-                        drawObChartArea: false
+                        drawOnChartArea: false
                     },
                     
                 }
@@ -284,29 +203,38 @@ export class Test implements OnInit, OnDestroy{
             }
         };
 
-        this.stackedbarData = {
+        // 不良率
+        this.DefectRateData = {
             labels: this.labels_day,
             datasets: [
                 {
-                label: '段取り',
+                type: 'bar',
+                label: '工程内不良',
                 backgroundColor: '#42A5F5',
-                data: [0.65, 0.59, 0.80]
+                data: [0.25, 0.19, 0.40],
+                yAxisID: 'y-axis-1'
                 },
                 {
-                label: '検査機NG',
+                type: 'bar',
+                label: '外観不良',
                 backgroundColor: '#66BB6A',
-                data: [0.28, 0.48, 0.40]
+                data: [0.28, 0.28, 0.20],
+                yAxisID: 'y-axis-1'
                 },
                 {
-                label: '外観NG',
+                type: 'line',
+                label: '目標不良率',
                 backgroundColor: '#de2f2fff',
-                data: [0.08, 0.18, 0.04]
-                },
+                borderColor: '#de2f2fff',
+                data: new Array(31).fill(0.5),
+                yAxisID: 'y-axis-1'
+                }
+                
             ]
 
         };
 
-        this.stackedbarOptions = {
+        this.DefectRateOptions = {
             maintainAspectRatio: false,
             aspectRatio: 1.0,
             responsive: true,
@@ -314,9 +242,22 @@ export class Test implements OnInit, OnDestroy{
                 x: {
                 stacked: true
                 },
-                y: {
-                stacked: true
-                }
+                // Y軸の設定
+                'y-axis-1': {
+                        type: 'linear',
+                        position: 'left',
+                        stacked: true,
+                        ticks: {
+                            color: textColorSecondary,
+                            beginAtZero: false,
+                            max: 2.0
+                        },
+                        grid: {
+                            color: surfaceBorder,
+                            drawBorder: false
+                        }
+                    },
+                
             }
 
         };
@@ -334,15 +275,33 @@ export class Test implements OnInit, OnDestroy{
         .subscribe((items: any[]) => {
             // 配列を初期化(31日分で0埋めした状態で宣言)
             const totalsByDay: number[] = new Array(31).fill(0);
+            const cumulativeProd: number[] = new Array(31).fill(0);
+            const totalsByDay2: number[] = new Array(31).fill(0);
+            const cumulativeProd2: number[] = new Array(31).fill(0);
+            // 日ごとの生産数をtotalsByDayに格納
             items.forEach(item => {              
                 const day = parseInt(item.prod_date.split('-')[2], 10); // 日付部分をintに変換
                 totalsByDay[day-1] = item.total_production; // dayをインデックスにして格納
+                totalsByDay2[day-1] = item.total_production-800; // dayをインデックスにして格納
             });
+            // 累計生産数をcumulativeProdに格納
+            let cumulativeSum = 0;
+            let cumulativeSum2 = 0;
+            for (let i = 0; i < totalsByDay.length; i++) {
+                cumulativeSum += Number(totalsByDay[i]);
+                cumulativeProd[i] = cumulativeSum;
+                cumulativeSum2 += Number(totalsByDay2[i]);
+                cumulativeProd2[i] = cumulativeSum2;
+
+            }
+
             // データセットに値を代入。
-            this.barData.datasets[0].data = totalsByDay;
-            this.barData.datasets[1].data = totalsByDay;
+            this.ProdChartData.datasets[0].data = totalsByDay2;
+            this.ProdChartData.datasets[1].data = totalsByDay;
+            this.ProdChartData.datasets[2].data = cumulativeProd2;
+            this.ProdChartData.datasets[3].data = cumulativeProd;
             // グラフエリアを更新
-            this.barData = { ...this.barData };
+            this.ProdChartData = { ...this.ProdChartData };
             
         });
 
@@ -351,57 +310,64 @@ export class Test implements OnInit, OnDestroy{
     // 品番ドロップダウンリスト更新(工場選択後)
     loadDropdownItems(factoryCode: number) {
         // 固定項目として全品番を宣言
-        const fixedItem = {name: '全品番', code: 'all'}
-        // 鍛造か切削かで分岐
-        // 鍛造を含む場合は全品番のみに固定
-        if(factoryCode === 0 || factoryCode === 1){
-            this.dropdownValues = [fixedItem]
-
+        const fixedItem = {name: '切削全品番', code: 'all'}
+        const fixedItem2 = {name: '鍛造品', code: '0'}
+        // 工場で分岐
+        if(factoryCode === 1){
+            //Jupiter        
+            this.dropdownValues = [fixedItem2]
         }
-        // 切削の場合は指定の工場で生産している品番を取得し、リストに格納
-        else{
+            //その他 
+        else{            
             this.kpiService.getPartsNo(factoryCode).subscribe((items: Kpi[]) =>
             {
                 const dynamicItems = items.map(item => ({
                     name: item.parts_no,
                     code: item.parts_no
                 }));
-                // 先頭のインデックスを固定項目に設定
-                this.dropdownValues = [fixedItem, ...dynamicItems]
                 
+                if(factoryCode === 5){
+                    //Saturn
+                    this.dropdownValues = [fixedItem, ...dynamicItems, fixedItem2]
+                }
+                else{
+                    this.dropdownValues = [fixedItem, ...dynamicItems]
+                }
+                                
             });
 
         }
-        
+        // 先頭のインデックスを固定項目に設定
         this.dropdownValue = null;
+        
     }
 
     // ラインNoドロップダウンリスト更新(品番選択後)
     loadDropdownItems2(factoryCode: number,partsCode: string){
-        // 固定項目として全設備を宣言
-        const fixedItem = {name: '全設備', code: 'all'}
-        // 鍛造か切削かで分岐
-        // 鍛造を含む場合は全品番のみに固定
-        if(factoryCode === 0 || factoryCode === 1){
-            this.dropdown2Values = [fixedItem]
+    // 固定項目として全品番を宣言
+        const fixedItem = {name: '全ライン', code: 'all'}
+        if (this.dropdownValue && this.dropdownValue.code !== undefined) {
+            if(this.dropdownValue.code === 'all'){
+                this.dropdown2Values = [fixedItem]
+            }
 
-        }
-        else{
-            // 設備ドロップダウンリスト更新
-            this.kpiService.getLineNo(factoryCode,partsCode).subscribe((items:any[]) =>
-            {
-                this.dropdown2Values = items.map(item => ({
-                    name: item.line_no,
-                    code: item.line_no
-                }));
-                this.dropdown2Value = null;
-            });
+            else{
+                // 設備ドロップダウンリスト更新
+                this.kpiService.getLineNo(factoryCode,partsCode).subscribe((items:any[]) =>
+                {
+                    const dynamicItems = items.map(item => ({
+                        name: item.line_no,
+                        code: item.machine_no
+                    }));
+                    this.dropdown2Values = [fixedItem, ...dynamicItems]
+                });
+            }
+            this.dropdown2Value = this.dropdown2Values[0];
+
         }
         
         // Chartデータ生成メソッドを呼び出し
-        if(factoryCode !== 0){
-            this.createChartData(factoryCode,partsCode)
-        }
+        this.createChartData(factoryCode,partsCode)
         
     }
 

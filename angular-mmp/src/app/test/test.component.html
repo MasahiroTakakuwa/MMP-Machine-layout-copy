@@ -28,14 +28,14 @@
 
             </div>
             <div class="font-semibold text-xl mb-4">生産実績</div>
-            <p-chart type="bar" [data]="barData" [options]="barOptions" style="height: 600px;"></p-chart>
+            <p-chart type="bar" [data]="ProdChartData" [options]="ProdChartOptions" style="height: 600px;"></p-chart>
         </div>
     </div>
 
     <div class="col-span-12 xl:col-span-12">
         <div class="card">        
             <div class="font-semibold text-xl mb-4">不良率</div>
-            <p-chart type="bar" [data]="stackedbarData" [options]="stackedbarOptions" style="height: 400px;"></p-chart>
+            <p-chart type="bar" [data]="DefectRateData" [options]="DefectRateOptions" style="height: 400px;"></p-chart>
         </div>
     </div>
 </p-fluid>

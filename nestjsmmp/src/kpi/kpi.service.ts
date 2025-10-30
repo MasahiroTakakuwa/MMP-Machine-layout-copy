@@ -30,6 +30,7 @@ async getPartsNoSummary(factory: number) {
   }
 
 // 指定された工場・品番のラインNoを取得
+// 条件分岐:fac
 async getLineNoSummary(factory: number,parts_no: string){
     const query = await this.deviceRepo
     .createQueryBuilder('m')
@@ -38,9 +39,21 @@ async getLineNoSummary(factory: number,parts_no: string){
     ])
     .where('m.factory_type = :factory', {factory})
     .andWhere('m.device_type = 40 ')
-    .andWhere('m.parts_no = :parts_no',{parts_no})
     .orderBy('m.line_no ')
+    if(parts_no ==='0'){
+      query.andWhere("m.parts_no = '-'")
+    }
+    else if(parts_no ==='all'){
+      query.andWhere("m.parts_no != '-'")
+    }
+    else{
+      query.andWhere('m.parts_no = :parts_no',{parts_no})
+    }
     const result = await query.getRawMany();
+
+    console.log('query:',query.getSql());
+    console.log('param:',query.getParameters());
+    console.log('result:',result);
     return result;
   }
 
@@ -59,8 +72,6 @@ async getproductSummary(factory: number,parts_no: string,date: string){
       query.andWhere('m.parts_no = :parts_no',{parts_no})
     }
     const result = await query.getRawMany();
-    console.log('SQL:',query.getSql());
-    console.log('result:',result);
     return result;
   }
 

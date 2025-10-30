@@ -200,8 +200,8 @@ export class Test2 implements OnInit, OnDestroy {
   // 💡 🇻🇳 Trả về màu tương ứng với hiệu suất máy (performance) | 🇯🇵 機械のパフォーマンス値に応じた色を返す
   getPerformanceColor(performance: number | null): string {
     if (performance == null)  return '#ccc';          // ❓ no data
-    if (performance >= 0.875) return '#2cd7f5ff';   // very high
-    if (performance >= 0.8)   return '#59df5eff';   // high
+    if (performance >= 0.85) return '#2cd7f5ff';   // very high
+    if (performance >= 0.7)   return '#59df5eff';   // high
                               return '#ffeb3b';     // low
                               //return '#f44336';     // very low
   }

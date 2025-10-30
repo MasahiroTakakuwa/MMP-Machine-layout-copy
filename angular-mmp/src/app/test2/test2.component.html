@@ -34,9 +34,7 @@
 
             <!-- ✅ 🇻🇳 Nền là ảnh SVG hiển thị sơ đồ nhà máy
                     🇯🇵 工場レイアウトの背景としてSVG画像を使用 -->
-            <!-- 🇻🇳 Bạn cần dán nội dung file SVG vào bên trong thẻ <svg>
-                🇯🇵 SVGファイルの中身をこの<svg>タグ内に貼り付けてください -->
-
+            
             <div class="flex justify-between items-center mb-1">
                 <h1 class="text-lg font-bold mb-0">🏭 Mercury Layout</h1>
 
@@ -81,24 +79,19 @@
                     <span>計画停止中</span>
                 </div>
 
-
-                <h6>稼働率</h6>
+                <!-- <h6>稼働率</h6>
                 <div class="flex gap-2 mb-2">
                     <span style="background-color: #2cd7f5ff;padding: 10px;"></span>
-                    <span>&ge;87.5%</span>
+                    <span>&ge;85%</span>
                 </div>
                 <div class="flex gap-2 mb-2">
                     <span style="background-color: #59df5eff;padding: 10px;"></span>
-                    <span>&ge;80%</span>
+                    <span>&ge;70%</span>
                 </div>
                 <div class="flex gap-2 mb-2">
-                    <span style="background-color: #ffeb3b;padding: 10px;"></span>
-                    <span>&ge;50%</span>
-                </div>
-                <div class="flex gap-2 mb-2">
-                    <span style="background-color: #f44336;padding: 10px;"></span>
+                    <span style="background-color: #f4f136;padding: 10px;"></span>
                     <span>&#60;50%</span>
-                </div>
+                </div> -->
                 </div>
                 <svg
                 viewBox="0 0 3840 2400"
@@ -122,7 +115,7 @@
                     <g *ngFor="let machine of machinesTypeNot40">
                         <!-- 🇻🇳 Khối chữ nhật đứng nền trắng: thân đèn tháp
                         🇯🇵 白い縦長の長方形：タワーライトの本体 -->
-                        <rect
+                        <!-- <rect
                         [attr.x]="machine.x "
                         [attr.y]="machine.y "
                         width="40"
@@ -131,7 +124,7 @@
                         stroke="black"
                         stroke-width="2"
                         rx="15"
-                        />
+                        /> -->
 
                         <!-- 🇻🇳 Chấm tròn đại diện bóng đèn màu theo trạng thái
                         🇯🇵 状態に応じた色付きの丸：タワーライト上部 -->
