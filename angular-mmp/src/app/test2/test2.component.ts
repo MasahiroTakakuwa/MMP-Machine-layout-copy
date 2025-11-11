@@ -42,9 +42,9 @@ export class Test2 implements OnInit, OnDestroy {
     { name: '稼働中' },
     { name: this.runningCount },
     { name: '停止中' },
-    { name: this.stoppingCount }
-    // { name: '計画停止中' },
-    // { name: this.planningstop }
+    { name: this.stoppingCount },
+    { name: '計画停止中' },
+    { name: this.planningstop }
     ];
 
     subscription: Subscription;
@@ -174,27 +174,30 @@ export class Test2 implements OnInit, OnDestroy {
           
         });
         
-        // ✅ statusList を更新
-        const statusList = this.machinesType40.map(machine => machine.status);
-        // ✅ 色ごとのカウントを取得してログ出力
-        const colorCounts = this.countColors(statusList);
-        console.log('色ごとのカウント:', colorCounts);
+        // ✅ 表示色ごとにカウント
+        const colorCounts = this.countColorsFromMachines(this.machinesType40);
+        // 画面左の一覧内の数値を変更
+        this.items[1].name = colorCounts['#84ff00ff'] || 0;
+        this.items[3].name = colorCounts['#ff0000ff'] || 0;
+        this.items[5].name = colorCounts['#ccc'] || 0;
 
       },
+        
+        
       error: (err) => {
         console.error('Lỗi khi gọi API:', err);
       },
     });
 
     // 稼働中・停止中の設備台数を取得
-    this.machineService.getStatusCount(2).subscribe(data => {
-      this.runningCount = data.runningCount;
-      this.stoppingCount = data.stoppingCount;
+    // this.machineService.getStatusCount(2).subscribe(data => {
+    //   this.runningCount = data.runningCount;
+    //   this.stoppingCount = data.stoppingCount;
       
-    })
+    // })
 
-    this.items[1].name = this.runningCount;
-    this.items[3].name = this.stoppingCount;
+    // this.items[1].name = this.runningCount;
+    // this.items[3].name = this.stoppingCount;
 
   }
 
@@ -240,6 +243,22 @@ export class Test2 implements OnInit, OnDestroy {
           });
         return colorCount;
       }
+  
+  
+  countColorsFromMachines(machines: any[]): { [color: string]: number } {
+    const colorCount: { [color: string]: number } = {};
+
+    machines.forEach(machine => {
+      const color = machine.schedule_stop_machine
+        ? '#ccc' // Stop 表示と同じ条件で色を固定
+        : this.getPerformanceColor(machine.status); // 通常の色
+
+      colorCount[color] = (colorCount[color] || 0) + 1;
+    });
+
+    return colorCount;
+  }
+
 
   // 📌 Hàm xử lý khi click vào SVG trong chế độ Edit mode, trả về tọa độ tại điểm click
   // 📌 編集モードでSVGをクリックしたときの処理関数。クリック地点の座標を返す
