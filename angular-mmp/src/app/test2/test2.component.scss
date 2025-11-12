@@ -94,15 +94,17 @@
   fill: #ffffff;
 }
 
+// 稼働率表示アイコン
 .machine-ellipse {
   rx: 70;
-  ry: 40;
+  ry: 70;
   stroke: black;
   stroke-width: 0;
 }
 
+// 稼働率テキスト
 .performance-text {
-  font-size: 40px;
+  font-size: 65px;
   fill: black;
   font-weight: regular;
   text-anchor: middle;
@@ -121,4 +123,9 @@
 
 .center-text {
   text-align: center;
+}
+
+::ng-deep .centered-table .p-datatable-thead > tr > th,
+::ng-deep .centered-table .p-datatable-tbody > tr > td{
+  font-size: 28px;
 }

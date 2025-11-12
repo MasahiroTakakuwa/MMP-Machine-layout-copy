@@ -23,21 +23,21 @@ import { StyleClass } from 'primeng/styleclass';
     standalone: true,
     imports: [CommonModule,HttpClientModule,FluidModule,FormsModule,DialogModule,TableModule,Tooltip,Toast],
     templateUrl: './test2.component.html',
-    styleUrls: ['./test2.compornent.scss'],
+    styleUrls: ['./test2.component.scss'],
     providers: [DialogService,MessageService]
     
 })
 export class Test2 implements OnInit, OnDestroy {
-
-  // カウント格納先の初期宣言
+    //稼動率を小数点以下切り捨てに変更のため追加。
+    Math = Math;
+    // カウント格納先の初期宣言
     lineCount: number = 0;
     runningCount: number = 0;
     stoppingCount: number = 0;
     planningstop: number = 0;
-    //statusList: number[] = [];
 
     // p-tableの初期設定
-    columns = [{ field: 'name', header: 'ライン数表示', StyleClass:'center-text' }];
+    columns = [{ field: 'name', StyleClass:'center-text' }];
     items = [
     { name: '稼働中' },
     { name: this.runningCount },
@@ -98,19 +98,6 @@ export class Test2 implements OnInit, OnDestroy {
     }, 15000);
 
     }
-
-    // 🎨 🇻🇳 Hàm trả về màu tương ứng với trạng thái máy | 🇯🇵 機械の状態に応じた色を返す関数
-    // getStatusColor(status: number): string {
-    //     switch (status) {
-    //     case 2:   return '#ccc';          // ❌ ERROR: xám - エラー
-    //     case 1:   return '#84ff00ff';   // ✅ RUNNING: xanh lá - 稼働中
-    //     case 0:   return '#ff0000ff';   // ⛔ STOP: đỏ - 停止
-    //     case 3:   return '#ff9800';     // 🔧 MAINTENANCE: cam - メンテナンス
-    //     case 4:   return '#2196f3';     // 💤 IDLE: xanh dương - 待機中
-    //     case 5:   return '#9c27b0';     // ⚠️ WARNING: tím - 警告
-    //     default:  return '#9e9e9e';    // ❓ Không xác định - 不明
-    //     }
-    // }
 
     // ✅ 🇻🇳 Bật/tắt trạng thái chỉnh sửa | 🇯🇵 編集モードのON/OFF切り替え
     toggleEditMode(): void {
@@ -189,15 +176,6 @@ export class Test2 implements OnInit, OnDestroy {
       },
     });
 
-    // 稼働中・停止中の設備台数を取得
-    // this.machineService.getStatusCount(2).subscribe(data => {
-    //   this.runningCount = data.runningCount;
-    //   this.stoppingCount = data.stoppingCount;
-      
-    // })
-
-    // this.items[1].name = this.runningCount;
-    // this.items[3].name = this.stoppingCount;
 
   }
 
@@ -213,25 +191,16 @@ export class Test2 implements OnInit, OnDestroy {
     return this.machines.filter(m => m.machine_type === 40);
   }
 
-  // 💡 🇻🇳 Trả về màu tương ứng với hiệu suất máy (performance) | 🇯🇵 機械のパフォーマンス値に応じた色を返す
-  // getPerformanceColor(performance: number | null): string {
-  //   if (performance == null)  return '#ccc';          // ❓ no data
-  //   if (performance >= 0.85) return '#2cd7f5ff';   // very high
-  //   if (performance >= 0.7)   return '#59df5eff';   // high
-  //                             return '#ffeb3b';     // low
-  //                             //return '#f44336';     // very low
-  // }
-
   // 2025.10.30 機械の状態に応じた色を返す方向にシフト
   getPerformanceColor(status: number): string{
     switch (status) {
-      case 2:   return '#ccc';          // ❌ ERROR: xám - エラー
+      case 2:   return '#ccc';        // ❌ ERROR: xám - エラー
       case 1:   return '#84ff00ff';   // ✅ RUNNING: xanh lá - 稼働中
       case 0:   return '#ff0000ff';   // ⛔ STOP: đỏ - 停止
       case 3:   return '#ff9800';     // 🔧 MAINTENANCE: cam - メンテナンス
       case 4:   return '#2196f3';     // 💤 IDLE: xanh dương - 待機中
       case 5:   return '#9c27b0';     // ⚠️ WARNING: tím - 警告
-      default:  return '#9e9e9e';    // ❓ Không xác định - 不明
+      default:  return '#9e9e9e';     // ❓ Không xác định - 不明
     }
   }
 
