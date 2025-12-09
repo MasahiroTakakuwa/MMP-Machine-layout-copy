@@ -41,8 +41,7 @@ export class DashboardComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    // VN Mặc định thu gọn sidebar nếu là màn hình nhỏ
-    // JP 画面が小さい場合はデフォルトでサイドバーを折りたたむ
+    // Mặc định thu gọn sidebar nếu là màn hình nhỏ
     this.isSidebarOpen = window.innerWidth >= 768; // md breakpoint của Tailwind = 768px
 
     // 🇻🇳 Gán route hiện tại để highlight menu
@@ -63,8 +62,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  // VN Hành động đóng mở Sidebar
-  // JP サイドバーの開閉動作
+  // Hành động đóng mở Sidebar
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }

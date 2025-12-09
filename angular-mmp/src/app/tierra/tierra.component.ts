@@ -32,15 +32,58 @@ import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { UsersService } from '../services/users.service';
 
+import { FluidModule } from 'primeng/fluid';
+import { debounceTime, Subscription } from 'rxjs';
+import { LayoutService } from '../layout/service/layout.service';
+import { Table, TableModule } from 'primeng/table';
+
 @Component({
   selector: 'app-tierra',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule,DialogModule,Tooltip,Toast], // ✅ 🇻🇳 Import các module cần thiết | 🇯🇵 必要なモジュールを読み込み
+  imports: [CommonModule, HttpClientModule, FluidModule, FormsModule, DialogModule, TableModule, Tooltip, Toast], // ✅ 🇻🇳 Import các module cần thiết | 🇯🇵 必要なモジュールを読み込み
   templateUrl: './tierra.component.html',
   styleUrls: ['./tierra.component.scss'],
   providers: [DialogService, MessageService]
 })
 export class TierraComponent implements OnInit, OnDestroy {
+  //稼動率を小数点以下切り捨てに変更のため追加。
+    Math = Math;
+    // カウント格納先の初期宣言
+    lineCount: number = 0;
+    runningCount: number = 0;
+    stoppingCount: number = 0;
+    abnormalstop: number = 0;
+    planningstop: number = 0;
+    sumCount: number = this.lineCount+this.runningCount+this.stoppingCount+this.abnormalstop+this.planningstop;
+
+    // p-tableの初期設定
+    columns = [{ field: 'name', StyleClass:'center-text' }];
+    items = [
+    { name: '稼働' },
+    { name: this.runningCount },
+    { name: '停止' },
+    { name: this.stoppingCount },
+    { name: '計画停止' },
+    { name: this.planningstop },
+    { name: '4h以上停止'},
+    { name: this.abnormalstop },
+    { name: 'ライン合計'},
+    { name: this.sumCount }
+    ];
+
+    subscription: Subscription;
+  constructor(  //declare service used in this component
+    private layoutService: LayoutService,
+    private machineService: MachineService,
+    public dialogService: DialogService,
+    private messageService: MessageService,
+    private userService: UsersService
+  ) {
+    this.subscription = this.layoutService.configUpdate$.pipe(debounceTime(25)).subscribe(() => {
+            
+        });
+  }
+
   // 🧠 🇻🇳 Mảng lưu danh sách máy được lấy từ API | 🇯🇵 APIから取得された機械のリスト
   machines: Machine[] = [];
   editMode: boolean = false; // ✅ 🇻🇳 Bật/tắt chế độ chỉnh sửa vị trí máy | 🇯🇵 位置編集モードのオン/オフ
@@ -58,13 +101,7 @@ export class TierraComponent implements OnInit, OnDestroy {
     }
   ]
   userPermissions:any[]=[] //mảng chứa quyền của user đang đăng nhập
-  constructor(  //declare service used in this component
-    private machineService: MachineService,
-    public dialogService: DialogService,
-    private messageService: MessageService,
-    private userService: UsersService
-  ) {}
-
+  
   ngOnInit(): void {
     //gọi api lấy thông tin user
     this.userService.selectedUser.subscribe(
@@ -82,19 +119,6 @@ export class TierraComponent implements OnInit, OnDestroy {
     this.refreshIntervalId = setInterval(() => {
       this.fetchMachines();
     }, 15000);
-  }
-
-  // 🎨 🇻🇳 Hàm trả về màu tương ứng với trạng thái máy | 🇯🇵 機械の状態に応じた色を返す関数
-  getStatusColor(status: number): string {
-    switch (status) {
-      case 2:   return '#ccc';          // ❌ ERROR: xám - エラー
-      case 1:   return '#84ff00ff';   // ✅ RUNNING: xanh lá - 稼働中
-      case 0:   return '#ff0000ff';   // ⛔ STOP: đỏ - 停止
-      case 3:   return '#ff9800';     // 🔧 MAINTENANCE: cam - メンテナンス
-      case 4:   return '#2196f3';     // 💤 IDLE: xanh dương - 待機中
-      case 5:   return '#9c27b0';     // ⚠️ WARNING: tím - 警告
-      default:  return '#9e9e9e';    // ❓ Không xác định - 不明
-    }
   }
 
   // ✅ 🇻🇳 Bật/tắt trạng thái chỉnh sửa | 🇯🇵 編集モードのON/OFF切り替え
@@ -129,6 +153,9 @@ onWheel(event: WheelEvent): void {
 
   // 🧹 🇻🇳 Dọn dẹp khi component bị hủy (ngOnDestroy) | 🇯🇵 コンポーネントが破棄されるときに実行される処理
   ngOnDestroy(): void {
+    if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
     if (this.refreshIntervalId) {
       clearInterval(this.refreshIntervalId);
     }
@@ -154,8 +181,24 @@ onWheel(event: WheelEvent): void {
             return element
           }
           
-        })
-      },
+        });
+        
+        // ✅ 表示色ごとにカウント
+        const colorCounts = this.countColorsFromMachines(this.machinesType40);
+        // 画面左の一覧内の数値を変更
+        this.items[1].name = colorCounts['#84ff00ff'] || 0;
+        this.items[3].name = colorCounts['#ff0000ff'] || 0;
+        this.items[5].name = colorCounts['#ccc'] || 0;
+        this.items[7].name = colorCounts['#f97000'] || 0;
+        
+        // ✅ 合計を計算して items[9].name に設定
+        this.items[9].name =
+          (this.items[1].name || 0) +
+          (this.items[3].name || 0) +
+          (this.items[5].name || 0) +
+          (this.items[7].name || 0);
+
+      },        
       error: (err) => {
         console.error('Lỗi khi gọi API:', err);
       },
@@ -174,13 +217,41 @@ onWheel(event: WheelEvent): void {
     return this.machines.filter(m => m.machine_type === 40);
   }
 
-  // 💡 🇻🇳 Trả về màu tương ứng với hiệu suất máy (performance) | 🇯🇵 機械のパフォーマンス値に応じた色を返す
-  getPerformanceColor(performance: number | null): string {
-    if (performance == null)  return '#ccc';          // ❓ no data
-    if (performance >= 0.875) return '#2cd7f5ff';   // very high
-    if (performance >= 0.8)   return '#59df5eff';   // high
-    if (performance >= 0.5)   return '#ffeb3b';     // low
-                              return '#f44336';     // very low
+  // 2025.10.30 機械の状態に応じた色を返す方向にシフト
+  getPerformanceColor(status: number): string{
+    switch (status) {
+      case 2:   return '#ccc';        // ❌ ERROR: xám - エラー
+      case 1:   return '#84ff00ff';   // ✅ RUNNING: xanh lá - 稼働中
+      case 0:   return '#ff0000ff';   // ⛔ STOP: đỏ - 停止
+      case 3:   return '#ff9800';     // 🔧 MAINTENANCE: cam - メンテナンス
+      case 4:   return '#2196f3';     // 💤 IDLE: xanh dương - 待機中
+      case 5:   return '#f97000';     // ⚠️ WARNING: tím - 警告
+      default:  return '#9e9e9e';     // ❓ Không xác định - 不明
+    }
+  }
+
+  countColors(statusList: number[]): { [color: string]:number } {
+      const colorCount:{ [color: string]: number } = {};            
+      statusList.forEach(status => {
+            const color = this.getPerformanceColor(status);
+            colorCount[color] = (colorCount[color] || 0) + 1;
+          });
+        return colorCount;
+      }
+  
+  
+  countColorsFromMachines(machines: any[]): { [color: string]: number } {
+    const colorCount: { [color: string]: number } = {};
+
+    machines.forEach(machine => {
+      const color = machine.schedule_stop_machine
+        ? '#ccc' // Stop 表示と同じ条件で色を固定
+        : this.getPerformanceColor(machine.status); // 通常の色
+
+      colorCount[color] = (colorCount[color] || 0) + 1;
+    });
+
+    return colorCount;
   }
 
   // 📌 Hàm xử lý khi click vào SVG trong chế độ Edit mode, trả về tọa độ tại điểm click
@@ -240,7 +311,6 @@ onWheel(event: WheelEvent): void {
       this.isPanning = false;
     }
   }
-
 inputDowntime(machine: Machine){
     //open dialog to input information of Schedule Stop Machine. This dialog is used to save schedule stop machine and set machine to Run status
     this.ref_dialog = this.dialogService.open(StatusMachineDialogComponent, {

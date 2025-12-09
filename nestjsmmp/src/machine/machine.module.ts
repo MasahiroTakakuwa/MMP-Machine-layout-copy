@@ -21,6 +21,4 @@ import { MachineService } from './machine.service';
     // ============================================================================
     providers: [MachineService],
 })
-export class MachineModule {
-    
-}
+export class MachineModule {}

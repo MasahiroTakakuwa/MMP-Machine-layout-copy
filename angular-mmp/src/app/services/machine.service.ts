@@ -37,7 +37,7 @@ export class MachineService {
 
   // ✅ 🇻🇳 Hàm lấy danh sách máy, truyền vào mã nhà máy (factory ID) động
   //    🇯🇵 工場ID（factory）を引数にして機械一覧を取得する関数です。
-  getMachines(factory: number = 0): Observable<Machine[]> {    
+  getMachines(factory: number = 0): Observable<Machine[]> {
     const url = `${this.apiURL}/machine?factory=${factory}`;
     return this.http.get<any>(url).pipe(
       map((res) => res as Machine[])
@@ -65,5 +65,4 @@ export class MachineService {
       map(res=> res as StatusStopMachine[])
     )
   }
-
 }

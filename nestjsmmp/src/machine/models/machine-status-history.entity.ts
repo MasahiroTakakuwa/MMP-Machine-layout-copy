@@ -15,7 +15,6 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('machine_status_history')           // ✅ Bảng gốc trên MySQL
                                             // ✅ MySQL上の実テーブル名
-
 export class MachineStatusHistory {
   @PrimaryGeneratedColumn({ name: 'ID' })
   id: number;
@@ -36,6 +35,12 @@ export class MachineStatusHistory {
   machine_type: number;
   // ✅ 🇻🇳 Phân loại thiết bị (VD: 40 = cuối line có counter)
   // ✅ 🇯🇵 設備の種類（例：40 = カウンター付きのライン終端）
+
+  @Column({ name: 'line_no'})
+  line_no: number;
+
+  @Column({ name: 'parts_name'})
+  parts_name: string;
 
   @Column({ name: 'status' })
   status: number;

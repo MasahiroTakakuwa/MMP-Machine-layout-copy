@@ -14,7 +14,6 @@
 
 import { Controller, Get, Query } from '@nestjs/common';
 import { MachineService } from './machine.service';
-import { query } from 'express';
 
 @Controller('machine')
 export class MachineController {
@@ -30,10 +29,8 @@ export class MachineController {
     //use getMachinePerformanceSummaryDemo for demo
     //use getMachinePerformanceSummary for actual in MMP
     return this.machineService.getMachinePerformanceSummary(factory);
-
   }
-
-  // 稼働中・停止中の設備台数をカウント
+    // 稼働中・停止中の設備台数をカウント
   @Get('count')
   async getMachineCount(@Query('factory') factory: number) {
     const runningCount = await this.machineService.getRunningMachineCount(factory);
